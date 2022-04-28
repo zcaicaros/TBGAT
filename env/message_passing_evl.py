@@ -117,7 +117,7 @@ def exact_solver(instance):
         machines_rearrange = np.expand_dims(inst[1], axis=-1)
         data = np.concatenate((machines_rearrange, times_rearrange), axis=-1)
         val, sol = MinimalJobshopSat(data.tolist())
-        ortools_makespan.append(val)
+        ortools_makespan.append(val[1])
         solutions.append(sol)
 
     return np.array(ortools_makespan), solutions
