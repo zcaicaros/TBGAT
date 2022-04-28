@@ -111,10 +111,8 @@ def main():
                 heads=args.heads,
                 dropout_for_gat=args.dropout_for_gat
             ).to(dev).eval()
-            if mixed_sizes:
-                saved_model_path = './saved_model/saved_incumbent_model_mixed_sizes.pth'
-            else:
-                saved_model_path = './saved_model/saved_incumbent_model_{}x{}.pth'.format(p_j, p_m)
+
+            saved_model_path = './saved_incumbent_model_{}x{}.pth'.format(p_j, p_m)
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 

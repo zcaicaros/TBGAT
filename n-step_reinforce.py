@@ -227,8 +227,8 @@ class NeuralTabu:
                     self.env_training.current_objs.cpu().mean().item(),
                     t2 - t1
                 ),
-                 'Validation Incumbent Gap': '{:.4f}'.format(self.gap_incumbent),
-                 'Validation Last Step Gap': '{:.4f}'.format(self.gap_last_step)}
+                 'V-IC': '{:.4f}'.format(self.gap_incumbent),
+                 'V-LS': '{:.4f}'.format(self.gap_last_step)}
             )
 
             # start validation and saving model & logs...
@@ -236,7 +236,7 @@ class NeuralTabu:
                 gap_incumbent, gap_last_step = self.validation(policy, dev)
                 validation_log.append([gap_incumbent, gap_last_step])
                 np.save('./validation_log.npy', np.array(validation_log))
-                np.save('./training_log.npy', np.array(validation_log))
+                np.save('./training_log.npy', np.array(training_log))
 
 
 if __name__ == '__main__':
