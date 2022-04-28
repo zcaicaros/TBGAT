@@ -4,22 +4,6 @@ import matplotlib.pyplot as plt
 
 j = 20  # 10， 15， 15， 20， 20
 m = 15  # 10， 10， 15， 10， 15
-l = 1
-h = 99
-init_type = 'fdd-divide-mwkr'
-reward_type = 'yaoxin'  # 'yaoxin', 'consecutive'
-gamma = 1
-
-hidden_dim = 128
-embedding_layer = 4
-policy_layer = 4
-embedding_type = 'gin+dghan'  # 'gin', 'dghan', 'gin+dghan'
-heads = 1
-drop_out = 0.
-
-lr = 5e-5  # 5e-5, 4e-5
-steps_learn = 10
-training_episode_length = 500
 batch_size = 64
 episodes = 128000  # 128000, 256000
 step_validation = 10
@@ -38,19 +22,9 @@ y_label_scale = 17
 anchor_text_size = 17
 
 
-if embedding_type == 'gin':
-    dghan_param_for_saved_model = 'NAN'
-elif embedding_type == 'dghan' or embedding_type == 'gin+dghan':
-    dghan_param_for_saved_model = '{}_{}'.format(heads, drop_out)
-else:
-    raise Exception('embedding_type should be one of "gin", "dghan", or "gin+dghan".')
-
-
-file1 = 'validation_log.npy'
-log1 = np.load(file1)
-
-
 if log_type == 'training':
+    file1 = './log/training_log_{}x{}.npy'.format(j, m)
+    log1 = np.load(file1)
     obj1 = log1[:log1.shape[0] // plot_step_size_training * plot_step_size_training].reshape(log1.shape[0] // plot_step_size_training, -1).mean(axis=1)
     # plotting...
     plt.figure(figsize=(8, 5.5))
@@ -67,6 +41,8 @@ if log_type == 'training':
         plt.show()
 
 else:
+    file1 = './log/validation_log_{}x{}.npy'.format(j, m)
+    log1 = np.load(file1)
     obj_incumbent1 = log1[:log1.shape[0] // plot_step_size_validation * plot_step_size_validation, 0].reshape(log1.shape[0] // plot_step_size_validation, -1).mean(axis=1)
     # plotting...
     # plt.xlabel('Iteration(stride-{})'.format(plot_step_size_validation), {'size': x_label_scale})

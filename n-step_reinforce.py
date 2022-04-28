@@ -235,8 +235,8 @@ class NeuralTabu:
             if batch_i % args.step_validation == 0:
                 gap_incumbent, gap_last_step = self.validation(policy, dev)
                 validation_log.append([gap_incumbent, gap_last_step])
-                np.save('./validation_log.npy', np.array(validation_log))
-                np.save('./training_log.npy', np.array(training_log))
+                np.save('./log/validation_log.npy', np.array(validation_log))
+                np.save('./log/training_log.npy', np.array(training_log))
 
 
 if __name__ == '__main__':
