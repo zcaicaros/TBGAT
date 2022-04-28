@@ -22,7 +22,7 @@ def main():
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['syn', 'tai', 'la']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+    testing_type = ['abz', 'ft', 'la', 'orb']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
     # ['abz', 'ft', 'la', 'orb'] 10x10
     # ['tai', 'la'] 15x15
     # ['tai', 'abz', 'swv'] 20x15
@@ -36,8 +36,8 @@ def main():
     abz_problem_m = [10]  # [10, 15]
     ft_problem_j = [10]  # [6, 10, 20]
     ft_problem_m = [10]  # [6, 10, 5]
-    la_problem_j = [15]  # [10, 15, 20, 10, 15, 20, 30, 15]
-    la_problem_m = [15]  # [5, 5, 5, 10, 10, 10, 10, 15]
+    la_problem_j = [10]  # [10, 15, 20, 10, 15, 20, 30, 15]
+    la_problem_m = [10]  # [5, 5, 5, 10, 10, 10, 10, 15]
     swv_problem_j = [20, 20, 50]  # [20, 20, 50]
     swv_problem_m = [10, 15, 10]  # [10, 15, 10]
     orb_problem_j = [10]
@@ -112,7 +112,7 @@ def main():
                 dropout_for_gat=args.dropout_for_gat
             ).to(dev).eval()
 
-            saved_model_path = './saved_incumbent_model_{}x{}.pth'.format(p_j, p_m)
+            saved_model_path = './saved_model/incumbent_model_{}x{}.pth'.format(p_j, p_m)
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 

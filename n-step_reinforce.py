@@ -125,11 +125,11 @@ class NeuralTabu:
         # saving model based on validation results
         if gap_incumbent < self.gap_incumbent:
             # print('Find better model w.r.t incumbent objs, saving model...')
-            torch.save(policy.state_dict(), 'saved_incumbent_model.pth')
+            torch.save(policy.state_dict(), './saved_model/incumbent_model_{}x{}.pth'.format(args.j, args.m))
             self.gap_incumbent = gap_incumbent
         if gap_last_step < self.gap_last_step:
             # print('Find better model w.r.t final step objs, saving model...')
-            torch.save(policy.state_dict(), 'saved_last_step_model.pth')
+            torch.save(policy.state_dict(), './saved_model/last_step_model_{}x{}.pth'.format(args.j, args.m))
             self.gap_last_step = gap_last_step
 
         return gap_incumbent, gap_last_step
@@ -137,16 +137,16 @@ class NeuralTabu:
     def train(self):
 
         # training seeds
-        torch.manual_seed(1)
-        random.seed(1)
-        np.random.seed(1)
+        torch.manual_seed(3456346)
+        random.seed(234234)
+        np.random.seed(34667)
 
         dev = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         print()
         print("Use {} to train...".format(dev))
-        print("{}x{}, lr={}, ent coeff={}, training horizon={}, update every {} transits.".format(
-            args.j, args.m, args.lr, args.ent_coeff, args.transit, args.steps_learn)
+        print("{}x{}, lr={}, batch-size={}, ent coeff={}, training horizon={}, update every {} transits.".format(
+            args.j, args.m, args.lr, args.batch_size, args.ent_coeff, args.transit, args.steps_learn)
         )
         print()
 
