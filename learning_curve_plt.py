@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-j = 20  # 10， 15， 15， 20， 20
-m = 15  # 10， 10， 15， 10， 15
+j = 10  # 10， 15， 15， 20， 20
+m = 10  # 10， 10， 15， 10， 15
 batch_size = 64
 episodes = 128000  # 128000, 256000
 step_validation = 10
@@ -12,7 +12,7 @@ step_validation = 10
 total_plt_steps = 200
 show = True
 save = False
-log_type = 'validation'  # 'training', 'validation'
+log_type = 'training'  # 'training', 'validation'
 value_type = 'last_step'  # 'last_step', 'incumbent'
 plot_step_size_training = (episodes // batch_size) // total_plt_steps
 plot_step_size_validation = (episodes // batch_size) // (total_plt_steps * 10)
@@ -29,7 +29,7 @@ if log_type == 'training':
     # plotting...
     plt.figure(figsize=(8, 5.5))
     plt.xlabel('Every {} batches.'.format(r'${}$'.format(plot_step_size_training)), {'size': x_label_scale})
-    plt.ylabel('Gap to CP-SAT', {'size': y_label_scale})
+    plt.ylabel('Training', {'size': y_label_scale})
     plt.grid()
     x = np.array([i + 1 for i in range(obj1.shape[0])])
     plt.plot(x, obj1, color='tab:blue', label='{}×{}'.format(10, 10))
@@ -48,7 +48,7 @@ else:
     # plt.xlabel('Iteration(stride-{})'.format(plot_step_size_validation), {'size': x_label_scale})
     plt.figure(figsize=(8, 5.5))
     plt.xlabel('Every {} batches.'.format(r'${}$'.format(plot_step_size_validation*10)), {'size': x_label_scale})
-    plt.ylabel('Gap to CP-SAT', {'size': y_label_scale})
+    plt.ylabel('Incumbent', {'size': y_label_scale})
     plt.grid()
     x1 = np.array([i + 1 for i in range(obj_incumbent1.shape[0])])
     plt.plot(x1, obj_incumbent1, color='tab:blue', label='{}×{}'.format(10, 10))
@@ -64,7 +64,7 @@ else:
     # plt.xlabel('Iteration(stride-{})'.format(plot_step_size_validation), {'size': x_label_scale})
     plt.figure(figsize=(8, 5.5))
     plt.xlabel('Every {} batches.'.format(r'${}$'.format(plot_step_size_validation*10)), {'size': x_label_scale})
-    plt.ylabel('Gap to CP-SAT', {'size': y_label_scale})
+    plt.ylabel('Last-Step', {'size': y_label_scale})
     plt.grid()
     x1 = np.array([i + 1 for i in range(obj_incumbent1.shape[0])])
     plt.plot(x1, obj_last_step1, color='tab:blue', label='{}×{}'.format(10, 10))

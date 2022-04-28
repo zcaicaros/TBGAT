@@ -22,13 +22,13 @@ def main():
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['abz', 'ft', 'la', 'orb']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
-    # ['abz', 'ft', 'la', 'orb'] 10x10
-    # ['tai', 'la'] 15x15
-    # ['tai', 'abz', 'swv'] 20x15
-    # ['tai', 'yn'] 20x20
-    # ['tai'] 30x15
-    # ['tai'] 30x20
+    testing_type = ['abz', 'ft', 'la', 'orb', 'syn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+    # ['abz', 'ft', 'la', 'orb', 'syn'] 10x10
+    # ['tai', 'la', 'syn'] 15x15
+    # ['tai', 'abz', 'swv', 'syn'] 20x15
+    # ['tai', 'yn', 'syn'] 20x20
+    # ['tai', 'syn'] 30x15
+    # ['tai', 'syn'] 30x20
 
     tai_problem_j = [15]  # [15, 20, 20, 30, 30, 50, 50, 100]
     tai_problem_m = [15]  # [15, 15, 20, 15, 20, 15, 20, 20]
@@ -44,8 +44,8 @@ def main():
     orb_problem_m = [10]
     yn_problem_j = [20]
     yn_problem_m = [20]
-    syn_problem_j = [15]  # [10, 15, 15, 20, 20, 100, 150]
-    syn_problem_m = [15]  # [10, 10, 15, 10, 15, 20, 25]
+    syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
+    syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
 
     # MDP config
     cap_horizon = 5000
@@ -112,7 +112,7 @@ def main():
                 dropout_for_gat=args.dropout_for_gat
             ).to(dev).eval()
 
-            saved_model_path = './saved_model/incumbent_model_{}x{}.pth'.format(p_j, p_m)
+            saved_model_path = './saved_model/incumbent_model_{}x{}_32_213.pth'.format(p_j, p_m)
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 

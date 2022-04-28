@@ -123,7 +123,6 @@ def exact_solver(instance):
     return np.array(ortools_makespan), solutions
 
 
-
 class ForwardPass(MessagePassing):
     def __init__(self, **kwargs):
         super(ForwardPass, self).__init__(**kwargs)

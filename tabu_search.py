@@ -49,16 +49,23 @@ class TSN5:
         ## Select move
         # copy G w.r.t. number of actions
         G_list = current_G.to_data_list()
+        print(len(G_list))
         G_expanded = []
         repeats = []
 
-        for a, g in zip(current_action_set, G_list):
+        for _, (a, g) in enumerate(zip(current_action_set, G_list)):
             if not a:
                 G_expanded += [g.clone()]
                 repeats += [1]
             else:
                 G_expanded += [g.clone() for _ in range(a[0].shape[0])]
                 repeats += [a[0].shape[0]]
+            print(self.env_rollout.num_nodes_per_example)
+            print(self.env_rollout.num_nodes_per_example[[_]])
+            self.evaluator.eval(
+                g,
+                num_nodes_per_example=self.env_rollout.num_nodes_per_example[[_]]
+            )
         G_expanded = Batch.from_data_list(G_expanded)
         num_nodes_per_example_expanded = torch.repeat_interleave(
             self.env_rollout.num_nodes_per_example,
