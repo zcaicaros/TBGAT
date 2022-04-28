@@ -142,6 +142,9 @@ class NeuralTabu:
             )
             self.gap_incumbent = gap_incumbent
 
+        if gap_last_step < self.gap_last_step:
+            self.gap_last_step = gap_last_step
+
         return gap_incumbent, gap_last_step
 
     def train(self):
