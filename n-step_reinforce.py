@@ -19,6 +19,15 @@ class NeuralTabu:
         self.env_training = Env()
         self.env_validation = Env()
         self.eps = np.finfo(np.float32).eps.item()
+        self.algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
+                    # env parameters
+                    args.tabu_size,
+                    # model parameters
+                    args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
+                    # training parameters
+                    args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
+                    args.step_validation, args.ent_coeff
+                )
 
         # load or generate validation dataset
         validation_data_path = './validation_data/validation_data_and_Cmax_{}x{}_[{},{}].npy'.format(
@@ -125,12 +134,13 @@ class NeuralTabu:
         # saving model based on validation results
         if gap_incumbent < self.gap_incumbent:
             # print('Find better model w.r.t incumbent objs, saving model...')
-            torch.save(policy.state_dict(), './saved_model/incumbent_model_{}x{}.pth'.format(args.j, args.m))
+            torch.save(
+                policy.state_dict(),
+                './saved_model/incumbent_model_{}.pth'.format(
+                    self.algo_config
+                )
+            )
             self.gap_incumbent = gap_incumbent
-        if gap_last_step < self.gap_last_step:
-            # print('Find better model w.r.t final step objs, saving model...')
-            torch.save(policy.state_dict(), './saved_model/last_step_model_{}x{}.pth'.format(args.j, args.m))
-            self.gap_last_step = gap_last_step
 
         return gap_incumbent, gap_last_step
 
@@ -165,7 +175,7 @@ class NeuralTabu:
         validation_log = []
 
         # add progress bar
-        pbar = tqdm(range(1, args.episodes // args.batch_size + 1))
+        pbar = tqdm(range(1, args.total_instances // args.batch_size + 1))
 
         for batch_i in pbar:
 
@@ -227,16 +237,16 @@ class NeuralTabu:
                     self.env_training.current_objs.cpu().mean().item(),
                     t2 - t1
                 ),
-                 'V-IC': '{:.4f}'.format(self.gap_incumbent),
-                 'V-LS': '{:.4f}'.format(self.gap_last_step)}
+                    'V-IC': '{:.4f}'.format(self.gap_incumbent),
+                    'V-LS': '{:.4f}'.format(self.gap_last_step)}
             )
 
             # start validation and saving model & logs...
             if batch_i % args.step_validation == 0:
                 gap_incumbent, gap_last_step = self.validation(policy, dev)
                 validation_log.append([gap_incumbent, gap_last_step])
-                np.save('./log/validation_log_{}x{}.npy'.format(args.j, args.m), np.array(validation_log))
-                np.save('./log/training_log_{}x{}.npy'.format(args.j, args.m), np.array(training_log))
+                np.save('./log/validation_log_{}.npy'.format(self.algo_config), np.array(validation_log))
+                np.save('./log/training_log_{}.npy'.format(self.algo_config), np.array(training_log))
 
 
 if __name__ == '__main__':

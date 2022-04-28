@@ -17,8 +17,32 @@ def main():
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using {} to test...'.format(dev))
 
-    # load model config
-    mixed_sizes = False
+    # env parameters
+    tabu_size = 20
+    # model parameters
+    hidden_channels = 128
+    out_channels = 128
+    heads = 8
+    dropout_for_gat = 0
+    # training parameters
+    j = 10
+    m = 10
+    lr = 1e-5
+    steps_learn = 10
+    transit = 500
+    batch_size = 32
+    total_instances = 32000
+    step_validation = 10
+    ent_coeff = 1e-5
+
+    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        # env parameters
+        tabu_size,
+        # model parameters
+        hidden_channels, out_channels, heads, dropout_for_gat,
+        # training parameters
+        j, m, lr, steps_learn, transit, batch_size, total_instances, step_validation, ent_coeff
+    )
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
@@ -112,7 +136,7 @@ def main():
                 dropout_for_gat=args.dropout_for_gat
             ).to(dev).eval()
 
-            saved_model_path = './saved_model/incumbent_model_{}x{}_32_213.pth'.format(p_j, p_m)
+            saved_model_path = './saved_model/{}.pth'.format(algo_config)
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 
