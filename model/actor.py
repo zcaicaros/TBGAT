@@ -111,9 +111,8 @@ class Actor(torch.nn.Module):
                  hidden_channels,
                  out_channels,
                  heads=4,
-                 dropout_for_gat=0,
-                 # policy parameters
-                 policy_l=3):
+                 dropout_for_gat=0):
+
         super().__init__()
 
         self.embedding_network = Embed(
@@ -127,7 +126,7 @@ class Actor(torch.nn.Module):
 
         # policy
         self.policy = Sequential(
-            Linear(out_channels * 8 + 1, out_channels * 2),
+            Linear(out_channels * 8 + 1, out_channels * 2),  # 1 for tabu label
             # torch.nn.BatchNorm1d(out_channels * 2),
             torch.nn.Tanh(),
             Linear(out_channels * 2, out_channels * 2),
@@ -188,6 +187,7 @@ class Actor(torch.nn.Module):
             sampled_action = torch.gather(
                 padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
             ).squeeze(dim=1)
+
             # greedy action
             # action_id = torch.argmax(pi, dim=-1)
 

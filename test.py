@@ -17,36 +17,19 @@ def main():
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using {} to test...'.format(dev))
 
-    # env parameters
-    tabu_size = 20
-    # model parameters
-    hidden_channels = 128
-    out_channels = 128
-    heads = 8
-    dropout_for_gat = 0
-    # training parameters
-    j = 10
-    m = 10
-    lr = 1e-5
-    steps_learn = 10
-    transit = 500
-    batch_size = 64
-    total_instances = 32000
-    step_validation = 10
-    ent_coeff = 1e-5
-
     algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
         # env parameters
-        tabu_size,
+        args.tabu_size,
         # model parameters
-        hidden_channels, out_channels, heads, dropout_for_gat,
+        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
         # training parameters
-        j, m, lr, steps_learn, transit, batch_size, total_instances, step_validation, ent_coeff
+        args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size,
+        args.total_instances, args.step_validation, args.ent_coeff
     )
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['la']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+    testing_type = ['abz', 'ft', 'la', 'orb', 'syn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
     # ['abz', 'ft', 'la', 'orb', 'syn'] 10x10
     # ['tai', 'la', 'syn'] 15x15
     # ['tai', 'abz', 'swv', 'syn'] 20x15
@@ -54,39 +37,39 @@ def main():
     # ['tai', 'syn'] 30x15
     # ['tai', 'syn'] 30x20
 
-    # tai_problem_j = [15]  # [15, 20, 20, 30, 30, 50, 50, 100]
-    # tai_problem_m = [15]  # [15, 15, 20, 15, 20, 15, 20, 20]
-    # abz_problem_j = [10]  # [10, 20]
-    # abz_problem_m = [10]  # [10, 15]
-    # ft_problem_j = [10]  # [6, 10, 20]
-    # ft_problem_m = [10]  # [6, 10, 5]
-    # la_problem_j = [10]  # [10, 15, 20, 10, 15, 20, 30, 15]
-    # la_problem_m = [10]  # [5, 5, 5, 10, 10, 10, 10, 15]
-    # swv_problem_j = [20, 20, 50]  # [20, 20, 50]
-    # swv_problem_m = [10, 15, 10]  # [10, 15, 10]
-    # orb_problem_j = [10]
-    # orb_problem_m = [10]
-    # yn_problem_j = [20]
-    # yn_problem_m = [20]
-    # syn_problem_j = [15]  # [10, 15, 15, 20, 20, 100, 150]
-    # syn_problem_m = [15]  # [10, 10, 15, 10, 15, 20, 25]
-
-    tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
-    tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
-    abz_problem_j = [10, 20]  # [10, 20]
-    abz_problem_m = [10, 15]  # [10, 15]
-    ft_problem_j = [6, 10, 20]  # [6, 10, 20]
-    ft_problem_m = [6, 10, 5]  # [6, 10, 5]
-    la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
-    la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
+    tai_problem_j = [15]  # [15, 20, 20, 30, 30, 50, 50, 100]
+    tai_problem_m = [15]  # [15, 15, 20, 15, 20, 15, 20, 20]
+    abz_problem_j = [10]  # [10, 20]
+    abz_problem_m = [10]  # [10, 15]
+    ft_problem_j = [10]  # [6, 10, 20]
+    ft_problem_m = [10]  # [6, 10, 5]
+    la_problem_j = [10]  # [10, 15, 20, 10, 15, 20, 30, 15]
+    la_problem_m = [10]  # [5, 5, 5, 10, 10, 10, 10, 15]
     swv_problem_j = [20, 20, 50]  # [20, 20, 50]
     swv_problem_m = [10, 15, 10]  # [10, 15, 10]
     orb_problem_j = [10]
     orb_problem_m = [10]
     yn_problem_j = [20]
     yn_problem_m = [20]
-    syn_problem_j = [10, 15, 15, 20, 20, 100, 150]  # [10, 15, 15, 20, 20, 100, 150]
-    syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
+    syn_problem_j = [15]  # [10, 15, 15, 20, 20, 100, 150]
+    syn_problem_m = [15]  # [10, 10, 15, 10, 15, 20, 25]
+
+    # tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
+    # tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
+    # abz_problem_j = [10, 20]  # [10, 20]
+    # abz_problem_m = [10, 15]  # [10, 15]
+    # ft_problem_j = [6, 10, 20]  # [6, 10, 20]
+    # ft_problem_m = [6, 10, 5]  # [6, 10, 5]
+    # la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
+    # la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
+    # swv_problem_j = [20, 20, 50]  # [20, 20, 50]
+    # swv_problem_m = [10, 15, 10]  # [10, 15, 10]
+    # orb_problem_j = [10]
+    # orb_problem_m = [10]
+    # yn_problem_j = [20]
+    # yn_problem_m = [20]
+    # syn_problem_j = [10, 15, 15, 20, 20, 100, 150]  # [10, 15, 15, 20, 20, 100, 150]
+    # syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
 
     # MDP config
     cap_horizon = 5000

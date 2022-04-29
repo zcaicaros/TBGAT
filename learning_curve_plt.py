@@ -7,7 +7,7 @@ tabu_size = 20
 # model parameters
 hidden_channels = 128
 out_channels = 128
-heads = 8
+heads = 4
 dropout_for_gat = 0
 # training parameters
 j = 10
@@ -33,7 +33,7 @@ algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
 total_plt_steps = 50
 show = True
 save = False
-log_type = 'validation'  # 'training', 'validation'
+log_type = 'training'  # 'training', 'validation'
 value_type = 'last_step'  # 'last_step', 'incumbent'
 plot_step_size_training = (total_instances // batch_size) // total_plt_steps
 plot_step_size_validation = (total_instances // batch_size) // (total_plt_steps * 10)
