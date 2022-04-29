@@ -10,8 +10,8 @@ out_channels = 128
 heads = 4
 dropout_for_gat = 0
 # training parameters
-j = 10
-m = 10
+j = 50
+m = 15
 lr = 1e-5
 steps_learn = 10
 transit = 500
