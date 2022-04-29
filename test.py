@@ -9,7 +9,8 @@ from parameters import args
 
 
 def main():
-    seed = 1
+
+    seed = args.t_seed
     random.seed(seed)
     np.random.seed(seed)
     np.seterr(divide='ignore')  # rm RuntimeWarning: divide by zero encountered in true_divide priority = fdd/wkr of Orb
@@ -122,6 +123,7 @@ def main():
 
             for init in init_type:
                 torch.manual_seed(seed)
+                torch.cuda.manual_seed_all(seed)
                 print('Starting rollout DRL policy...')
                 results_each_init, inference_time_each_init = [], []
                 # t3 = time.time()
@@ -251,6 +253,7 @@ def main():
 
                 for init in init_type:
                     torch.manual_seed(seed)
+                    torch.cuda.manual_seed_all(seed)
                     print('Starting rollout DRL policy...')
                     results_each_init, inference_time_each_init = [], []
                     # t3 = time.time()

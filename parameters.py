@@ -33,5 +33,6 @@ parser.add_argument('--test_specific_size', type=bool, default=True)
 parser.add_argument('--test_synthetic', type=bool, default=False)
 parser.add_argument('--t_j', type=int, default=10)
 parser.add_argument('--t_m', type=int, default=10)
+parser.add_argument('--t_seed', type=int, default=1)
 
 args = parser.parse_args()

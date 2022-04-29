@@ -151,6 +151,7 @@ class NeuralTabu:
 
         # training seeds
         torch.manual_seed(1)
+        torch.cuda.manual_seed_all(1)
         random.seed(1)
         np.random.seed(1)
 
