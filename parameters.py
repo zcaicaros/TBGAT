@@ -28,5 +28,10 @@ parser.add_argument('--total_instances', type=int, default=32000)
 parser.add_argument('--step_validation', type=int, default=10)
 parser.add_argument('--ent_coeff', type=float, default=1e-5)
 parser.add_argument('--validation_inst_number', type=int, default=100)
+# testing parameters
+parser.add_argument('--test_specific_size', type=bool, default=True)
+parser.add_argument('--test_synthetic', type=bool, default=False)
+parser.add_argument('--t_j', type=int, default=10)
+parser.add_argument('--t_m', type=int, default=10)
 
 args = parser.parse_args()
