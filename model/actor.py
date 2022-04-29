@@ -140,64 +140,78 @@ class Actor(torch.nn.Module):
         )
 
     def forward(self, pyg_sol, feasible_action, optimal_mark, critical_path=None, drop_out=0):
-        x = pyg_sol.x
-        edge_index = pyg_sol.edge_index
-        batch = pyg_sol.batch
 
-        # embedding disjunctive graph...
-        node_h, g_pool = self.embedding_network(x, edge_index, batch, drop_out=drop_out)
-        node_h = torch.cat(
-            [node_h, g_pool.repeat_interleave(repeats=pyg_sol.num_node_per_example, dim=0)],
-            dim=-1
-        )
+        action_list_merged = [actions[0] for actions in feasible_action if actions]
 
-        ## compute action probability
-        # get action embedding ready
-        action_merged_with_tabu_label = torch.cat([actions[0] for actions in feasible_action if actions], dim=0)
-        actions_merged = action_merged_with_tabu_label[:, :2]
-        tabu_label = action_merged_with_tabu_label[:, [2]]
-        action_h_with_tabu_label = torch.cat(
-            [node_h[actions_merged[:, 0]], node_h[actions_merged[:, 1]], tabu_label], dim=-1
-        )
-        # compute action score
-        action_score = self.policy(action_h_with_tabu_label)
-        action_count = [actions[0].shape[0] for actions in feasible_action if actions]
-        _max_count = max(action_count)
-        actions_score_split = list(torch.split(action_score, split_size_or_sections=action_count))
-        padded_score = pad_sequence(actions_score_split, padding_value=-torch.inf).transpose(0, -1).transpose(0, 1)
-        # sample actions
-        pi = F.softmax(padded_score, dim=-1)
-        dist = Categorical(probs=pi)
-        action_id = dist.sample()
-        padded_action = pad_sequence(
-            [actions[0][:, :2] for actions in feasible_action if actions],
-        ).transpose(0, 1)
-        sampled_action = torch.gather(
-            padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
-        ).squeeze(dim=1)
-        # action_id = torch.argmax(pi, dim=-1)  # greedy action
+        # if [] then all instances are optimally solved
+        if not action_list_merged:
 
-        # compute log_p and policy entropy regardless of optimal sol
-        log_prob = dist.log_prob(action_id)
-        entropy = dist.entropy()
+            return None, None, None
 
-        # compute padded log_p, where optimal sol has 0 log_0, since no action, otherwise cause shape bug
-        log_prob_padded = torch.zeros(
-            size=optimal_mark.shape,
-            device=x.device,
-            dtype=torch.float
-        )
-        log_prob_padded[~optimal_mark, :] = log_prob.squeeze()
+        else:
+            x = pyg_sol.x
+            edge_index = pyg_sol.edge_index
+            batch = pyg_sol.batch
 
-        # compute padded ent, where optimal sol has 0 ent, since no action, otherwise cause shape bug
-        entropy_padded = torch.zeros(
-            size=optimal_mark.shape,
-            device=x.device,
-            dtype=torch.float
-        )
-        entropy_padded[~optimal_mark, :] = entropy.squeeze()
+            # embedding disjunctive graph...
+            node_h, g_pool = self.embedding_network(x, edge_index, batch, drop_out=drop_out)
+            node_h = torch.cat(
+                [node_h, g_pool.repeat_interleave(repeats=pyg_sol.num_node_per_example, dim=0)],
+                dim=-1
+            )
 
-        return sampled_action, log_prob_padded, entropy_padded
+            ## compute action probability
+            # get action embedding ready
+            action_merged_with_tabu_label = torch.cat(action_list_merged, dim=0)
+            actions_merged = action_merged_with_tabu_label[:, :2]
+            tabu_label = action_merged_with_tabu_label[:, [2]]
+            action_h_with_tabu_label = torch.cat(
+                [node_h[actions_merged[:, 0]],
+                 node_h[actions_merged[:, 1]],
+                 tabu_label], dim=-1
+            )
+
+            # compute action score
+            action_count = [actions[0].shape[0] for actions in feasible_action if actions]  # if no action then ignore
+            action_score = self.policy(action_h_with_tabu_label)
+            _max_count = max(action_count)
+            actions_score_split = list(torch.split(action_score, split_size_or_sections=action_count))
+            padded_score = pad_sequence(actions_score_split, padding_value=-torch.inf).transpose(0, -1).transpose(0, 1)
+
+            # sample actions
+            pi = F.softmax(padded_score, dim=-1)
+            dist = Categorical(probs=pi)
+            action_id = dist.sample()
+            padded_action = pad_sequence(
+                [actions[0][:, :2] for actions in feasible_action if actions],
+            ).transpose(0, 1)
+            sampled_action = torch.gather(
+                padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
+            ).squeeze(dim=1)
+            # greedy action
+            # action_id = torch.argmax(pi, dim=-1)
+
+            # compute log_p and policy entropy regardless of optimal sol
+            log_prob = dist.log_prob(action_id)
+            entropy = dist.entropy()
+
+            # compute padded log_p, where optimal sol has 0 log_0, since no action, otherwise cause shape bug
+            log_prob_padded = torch.zeros(
+                size=optimal_mark.shape,
+                device=x.device,
+                dtype=torch.float
+            )
+            log_prob_padded[~optimal_mark, :] = log_prob.squeeze()
+
+            # compute padded ent, where optimal sol has 0 ent, since no action, otherwise cause shape bug
+            entropy_padded = torch.zeros(
+                size=optimal_mark.shape,
+                device=x.device,
+                dtype=torch.float
+            )
+            entropy_padded[~optimal_mark, :] = entropy.squeeze()
+
+            return sampled_action, log_prob_padded, entropy_padded
 
 
 if __name__ == '__main__':
@@ -236,7 +250,7 @@ if __name__ == '__main__':
     l = 1
     h = 99
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
-    init_type = 'fdd-divide-mwkr'  # 'spt', 'fdd-divide-mwkr'
+    init_type = 'fdd-divide-wkr'  # 'spt', 'fdd-divide-mwkr'
     seed = 25  # 6: two paths for the second instance
     np.random.seed(seed)
     backward_option = False  # if true usually do not pass N5 property

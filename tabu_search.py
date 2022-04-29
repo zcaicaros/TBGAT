@@ -1,6 +1,7 @@
 import torch_geometric.utils
 
 from env.message_passing_evl import MassagePassingEval
+from torch_geometric.utils import sort_edge_index
 from torch_geometric.data.batch import Batch
 from ortools_solver import MinimalJobshopSat
 from env.environment import Env
@@ -46,34 +47,28 @@ class TSN5:
             )
 
     def calculate_move(self, current_G, current_action_set, current_Cmax):
-        ## Select move
-        # copy G w.r.t. number of actions
+
+        # sort edge_index otherwise to_data_list() fn will be messed and bug
+        current_G.edge_index = sort_edge_index(current_G.edge_index)
         G_list = current_G.to_data_list()
-        print(len(G_list))
+
         G_expanded = []
         repeats = []
-
+        action_exist = []
         for _, (a, g) in enumerate(zip(current_action_set, G_list)):
             if not a:
                 G_expanded += [g.clone()]
                 repeats += [1]
+                action_exist += [False]
             else:
                 G_expanded += [g.clone() for _ in range(a[0].shape[0])]
                 repeats += [a[0].shape[0]]
-            print(self.env_rollout.num_nodes_per_example)
-            print(self.env_rollout.num_nodes_per_example[[_]])
-            self.evaluator.eval(
-                g,
-                num_nodes_per_example=self.env_rollout.num_nodes_per_example[[_]]
-            )
+                action_exist += [True for _ in range(a[0].shape[0])]
         G_expanded = Batch.from_data_list(G_expanded)
         num_nodes_per_example_expanded = torch.repeat_interleave(
             self.env_rollout.num_nodes_per_example,
             repeats=torch.tensor(repeats, device=self.device)
         )
-
-        print(current_action_set)
-        print(num_nodes_per_example_expanded)
 
         est, lst, make_span, _, _, _ = self.evaluator.eval(
             G_expanded,
@@ -90,13 +85,11 @@ class TSN5:
                     torch.cumsum(num_nodes_per_example_expanded, dim=0) - num_nodes_per_example_expanded).cpu().numpy()
         self.env_one_step.T = (torch.cumsum(num_nodes_per_example_expanded, dim=0) - 1).cpu().numpy()
         self.env_one_step.num_instance = self.env_one_step.S.shape[0]
-        self.env_one_step.incumbent_objs = torch.repeat_interleave(current_Cmax, repeats=torch.tensor(repeats, device=self.device))
+        self.env_one_step.incumbent_objs = make_span
         self.env_one_step.machine_count = torch.repeat_interleave(
-            torch.tensor(
-                [instance.shape[2] for instance in self.instances],
-                dtype=torch.int,
-                device=self.device
-            ), repeats=torch.tensor(repeats, device=self.device))
+            self.env_rollout.machine_count,
+            repeats=torch.tensor(repeats, device=self.device)
+        )
         self.env_one_step._machine_count_cumsum = torch.repeat_interleave(
             self.env_one_step.machine_count.cumsum(dim=0) - self.env_one_step.machine_count,
             self.env_one_step.num_nodes_per_example
@@ -113,20 +106,20 @@ class TSN5:
         _operation_index_helper1 = torch.cumsum(
             self.env_one_step.num_nodes_per_example, dim=0
         ) - self.env_one_step.num_nodes_per_example
+        _operation_index_helper1 = _operation_index_helper1[action_exist]
 
         _operation_index_helper2 = torch.cumsum(
             self.env_rollout.num_nodes_per_example, dim=0
         ) - self.env_rollout.num_nodes_per_example
 
-        print(_operation_index_helper1)
-        print(_operation_index_helper2)
-        print(torch.cat(
-            [actions[0][:, :2] - _operation_index_helper2[_] for _, actions in enumerate(current_action_set) if actions], dim=0
-        ))
-
         action_merged_one_step = torch.cat(
             [actions[0][:, :2] - _operation_index_helper2[_] for _, actions in enumerate(current_action_set) if actions], dim=0
         ) + _operation_index_helper1.unsqueeze(-1)
+
+        print(action_exist)
+        print(_operation_index_helper1.unsqueeze(-1))
+        print(action_merged_one_step)
+        print(current_action_set)
 
         # step one-step forward to test all candidate actions
         _Cmax_before_step = self.env_one_step.incumbent_objs
