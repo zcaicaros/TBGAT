@@ -25,13 +25,13 @@ def main():
     heads = 8
     dropout_for_gat = 0
     # training parameters
-    j = 10
-    m = 10
+    j = 15
+    m = 15
     lr = 1e-5
     steps_learn = 10
     transit = 500
     batch_size = 32
-    total_instances = 32000
+    total_instances = 16000
     step_validation = 10
     ent_coeff = 1e-5
 
@@ -46,7 +46,7 @@ def main():
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['abz', 'ft', 'la', 'orb', 'syn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+    testing_type = ['tai', 'la', 'syn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
     # ['abz', 'ft', 'la', 'orb', 'syn'] 10x10
     # ['tai', 'la', 'syn'] 15x15
     # ['tai', 'abz', 'swv', 'syn'] 20x15
@@ -60,16 +60,16 @@ def main():
     abz_problem_m = [10]  # [10, 15]
     ft_problem_j = [10]  # [6, 10, 20]
     ft_problem_m = [10]  # [6, 10, 5]
-    la_problem_j = [10]  # [10, 15, 20, 10, 15, 20, 30, 15]
-    la_problem_m = [10]  # [5, 5, 5, 10, 10, 10, 10, 15]
+    la_problem_j = [15]  # [10, 15, 20, 10, 15, 20, 30, 15]
+    la_problem_m = [15]  # [5, 5, 5, 10, 10, 10, 10, 15]
     swv_problem_j = [20, 20, 50]  # [20, 20, 50]
     swv_problem_m = [10, 15, 10]  # [10, 15, 10]
     orb_problem_j = [10]
     orb_problem_m = [10]
     yn_problem_j = [20]
     yn_problem_m = [20]
-    syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
-    syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
+    syn_problem_j = [15]  # [10, 15, 15, 20, 20, 100, 150]
+    syn_problem_m = [15]  # [10, 10, 15, 10, 15, 20, 25]
 
     # MDP config
     cap_horizon = 5000
@@ -136,7 +136,7 @@ def main():
                 dropout_for_gat=args.dropout_for_gat
             ).to(dev).eval()
 
-            saved_model_path = './saved_model/{}.pth'.format(algo_config)
+            saved_model_path = './saved_model/incumbent_model_' + algo_config + '.pth'
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 
