@@ -13,7 +13,7 @@ parser.add_argument('--in_channels_fwd', type=int, default=3)
 parser.add_argument('--in_channels_bwd', type=int, default=3)
 parser.add_argument('--hidden_channels', type=int, default=128)
 parser.add_argument('--out_channels', type=int, default=128)
-parser.add_argument('--heads', type=int, default=8)
+parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--dropout_for_gat', type=float, default=0)
 # training parameters
 parser.add_argument('--j', type=int, default=10)
