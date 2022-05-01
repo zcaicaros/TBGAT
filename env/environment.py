@@ -285,7 +285,7 @@ class Env:
         _t3 = time.time()
         critical_operation = torch.tensor(
             sum([p[1:-1] for ps in paths_all for p in ps], []),
-            dtype=torch.long, device=self.G_batch.x.device)  # 1-D tensor
+            dtype=torch.long, device=self.G_batch.edge_index.device)  # 1-D tensor
         machine_id = self.G_batch.m_id[critical_operation].squeeze()
         instance_id = self.G_batch.batch[critical_operation].squeeze()
         _machine_id_augmented = machine_id + self._machine_count_cumsum[
@@ -397,10 +397,13 @@ class Env:
             t1_ = time.time()
             # if no action provided, then random generate some
             edge_index_disjunctions = self.G_batch.edge_index_disjunctions
-            if action is None:
-                action = self.random_action(show_action_space_compute_time=show_action_space_compute_time)
-                if not action:
-                    return  # if all instances have no feasible actions, no need step
+            if action is None:  # if there are actions to select, random select, otherwise optimal and do nothing
+                action = self.random_action(show_action_space_compute_time=False)
+                if not action:  # if all optimal do nothing
+                    self.itr += 1
+                    return self.G_batch, \
+                           self.incumbent_objs - self.incumbent_objs, \
+                           self.get_candidate_moves(prt=show_action_space_compute_time)
                 action = torch.stack(action)
             t2_ = time.time()
             # print(t2_ - t1_)
@@ -618,7 +621,6 @@ if __name__ == '__main__':
     np.random.seed(seed)
     mask_previous = False  # if true usually do not pass N5 property
     print_step_time = True
-    print_time_of_calculating_moves = True
     print_action_space_compute_time = True
     path_finder = 'pytorch'  # 'networkx' or 'pytorch'
     tb_size = 20  # tabu_size
@@ -693,7 +695,7 @@ if __name__ == '__main__':
         machines_rearrange = np.expand_dims(inst[1], axis=-1)
         data = np.concatenate((machines_rearrange, times_rearrange), axis=-1)
         val, sol = MinimalJobshopSat(data.tolist())
-        ortools_makespan.append(val)
+        ortools_makespan.append(val[1])
     ortools_makespan = np.array(ortools_makespan, dtype=float)
     # which instance got optimal solution
     indeed_optimal = np.nonzero(env.current_objs.squeeze().cpu().numpy() == ortools_makespan)[0]

@@ -242,7 +242,7 @@ def processing_order_to_edge_index(order, instance):
     # rollout ortools solution
     steps_basedon_sol = []
     for i in range(n_m):
-        get_col_position_unsorted = np.argwhere(mch == (i))  # if m iterate from 1 then mch == (i+1)
+        get_col_position_unsorted = np.argwhere(mch == (i+1))  # if m iterate from 1 then mch == (i+1)
         get_col_position_sorted = get_col_position_unsorted[order[i]]
         sol_i = order[i] * n_m + get_col_position_sorted[:, 1]
         steps_basedon_sol.append(sol_i.tolist())

@@ -24,8 +24,6 @@ class TSN5:
         self.evaluator = MassagePassingEval()
         # rollout env init
         self.env_rollout = Env()
-        # one-step forward env init
-        self.env_one_step = Env()
 
     def solve(self):
 
@@ -38,7 +36,7 @@ class TSN5:
             mask_previous_action=False,
             longest_path_finder='pytorch')
 
-        while self.env_rollout.itr < 2:
+        while self.env_rollout.itr < 5:
             selected_action = self.calculate_move(G, action_set, self.env_rollout.current_objs)
             G, _, (action_set, _, _) = self.env_rollout.step(
                 action=selected_action,
@@ -50,8 +48,12 @@ class TSN5:
 
         # sort edge_index otherwise to_data_list() fn will be messed and bug
         current_G.edge_index = sort_edge_index(current_G.edge_index)
-        G_list = current_G.to_data_list()
+        # sort edge_index_disjunctions otherwise to_data_list() fn will be messed and bug
+        current_G.edge_index_disjunctions = sort_edge_index(current_G.edge_index_disjunctions)
 
+        # copy G for one-step forward
+        G_list = current_G.to_data_list()
+        num_nodes_per_example = torch.tensor([G.num_nodes for G in G_list], device=self.device)
         G_expanded = []
         repeats = []
         action_exist = []
@@ -65,80 +67,88 @@ class TSN5:
                 repeats += [a[0].shape[0]]
                 action_exist += [True for _ in range(a[0].shape[0])]
         G_expanded = Batch.from_data_list(G_expanded)
-        num_nodes_per_example_expanded = torch.repeat_interleave(
-            self.env_rollout.num_nodes_per_example,
+        num_nodes_per_example_one_step = torch.repeat_interleave(
+            num_nodes_per_example,
             repeats=torch.tensor(repeats, device=self.device)
         )
 
-        est, lst, make_span, _, _, _ = self.evaluator.eval(
-            G_expanded,
-            num_nodes_per_example=num_nodes_per_example_expanded
-        )
-
-        G_expanded.est = est
-        G_expanded.lst = lst
-
-        # Reset one-step env
-        self.env_one_step.num_nodes_per_example = num_nodes_per_example_expanded
-        self.env_one_step.G_batch = G_expanded
-        self.env_one_step.S = (
-                    torch.cumsum(num_nodes_per_example_expanded, dim=0) - num_nodes_per_example_expanded).cpu().numpy()
-        self.env_one_step.T = (torch.cumsum(num_nodes_per_example_expanded, dim=0) - 1).cpu().numpy()
-        self.env_one_step.num_instance = self.env_one_step.S.shape[0]
-        self.env_one_step.incumbent_objs = make_span
-        self.env_one_step.machine_count = torch.repeat_interleave(
-            self.env_rollout.machine_count,
-            repeats=torch.tensor(repeats, device=self.device)
-        )
-        self.env_one_step._machine_count_cumsum = torch.repeat_interleave(
-            self.env_one_step.machine_count.cumsum(dim=0) - self.env_one_step.machine_count,
-            self.env_one_step.num_nodes_per_example
-        )
-        self.env_one_step.tabu_list = [
-            -torch.ones(size=[self.tabu_size, 2], device=self.device, dtype=torch.int64)
-            for _ in range(self.env_one_step.num_instance)
-        ]
-        self.env_one_step.previous_action = [
-            torch.tensor([-1, -1], device=self.device, dtype=torch.int64) for _ in
-            range(self.env_one_step.num_instance)]
-
-        # prepare actions
+        ## prepare actions for one-setp rollout
+        # for rm operation id increment for old action
         _operation_index_helper1 = torch.cumsum(
-            self.env_one_step.num_nodes_per_example, dim=0
-        ) - self.env_one_step.num_nodes_per_example
-        _operation_index_helper1 = _operation_index_helper1[action_exist]
+            num_nodes_per_example, dim=0
+        ) - num_nodes_per_example
 
+        # for add operation id increment for new action
         _operation_index_helper2 = torch.cumsum(
-            self.env_rollout.num_nodes_per_example, dim=0
-        ) - self.env_rollout.num_nodes_per_example
+            num_nodes_per_example_one_step, dim=0
+        ) - num_nodes_per_example_one_step
+        _operation_index_helper2 = _operation_index_helper2[action_exist]
 
+        # merge all action by rm and add action id
         action_merged_one_step = torch.cat(
-            [actions[0][:, :2] - _operation_index_helper2[_] for _, actions in enumerate(current_action_set) if actions], dim=0
-        ) + _operation_index_helper1.unsqueeze(-1)
+            [actions[0][:, :2] - _operation_index_helper1[_] for _, actions in enumerate(current_action_set) if
+             actions], dim=0
+        ) + _operation_index_helper2.unsqueeze(-1)
 
-        print(action_exist)
-        print(_operation_index_helper1.unsqueeze(-1))
-        print(action_merged_one_step)
-        print(current_action_set)
+        ## one step
+        # action: u -> v
+        u = action_merged_one_step[:, 0]
+        v = action_merged_one_step[:, 1]
+        edge_index_disjunctions = G_expanded.edge_index_disjunctions
+        # mask for arcs: m^{-1}(u) -> u, u -> v, and v -> m(v), all have shape [num edge]
+        mask1 = (~torch.eq(edge_index_disjunctions[1], u.reshape(-1, 1))).sum(dim=0) == u.shape[0]  # m^{-1}(u) -> u
+        mask2 = (~torch.eq(edge_index_disjunctions[0], u.reshape(-1, 1))).sum(dim=0) == u.shape[0]  # u -> v
+        mask3 = (~torch.eq(edge_index_disjunctions[0], v.reshape(-1, 1))).sum(dim=0) == v.shape[0]  # v -> m(v)
+        # edges to be removed
+        edge_m_neg_u_to_u = edge_index_disjunctions[:, ~mask1]
+        edge_u_to_v = edge_index_disjunctions[:, ~mask2]
+        edge_v_to_mv = edge_index_disjunctions[:, ~mask3]
+        # remove arcs: m^{-1}(u) -> u, u -> v, and v -> m(v)
+        mask = mask1 * mask2 * mask3
+        edge_index_disjunctions = edge_index_disjunctions[:, mask]
+        # build new arcs m^{-1}(u) -> v
+        _idx_m_neg_u_to_v = torch.eq(edge_m_neg_u_to_u[1].unsqueeze(1), edge_u_to_v[0]).nonzero()[:, 1]
+        _edge_m_neg_u_to_v = torch.stack([edge_m_neg_u_to_u[0], edge_u_to_v[1, _idx_m_neg_u_to_v]])
+        # build new arcs v -> u
+        _edge_v_to_u = torch.flip(edge_u_to_v, dims=[0])
+        # build new arcs u -> m(v)
+        _idx_u_to_mv = torch.eq(edge_v_to_mv[0].unsqueeze(1), edge_u_to_v[1]).nonzero()[:, 1]
+        _edge_u_to_mv = torch.stack([edge_u_to_v[0, _idx_u_to_mv], edge_v_to_mv[1]])
+        # add new arcs to edge_index_disjunctions
+        edge_index_disjunctions = torch.cat(
+            [edge_index_disjunctions, _edge_m_neg_u_to_v, _edge_v_to_u, _edge_u_to_mv], dim=1
+        )  # unsorted
 
-        # step one-step forward to test all candidate actions
-        _Cmax_before_step = self.env_one_step.incumbent_objs
-        # print(_Cmax_before_step)
-        current_G, reward, (_, _, _) = self.env_one_step.step(
-            action=action_merged_one_step,
-            prt=False,
-            show_action_space_compute_time=False
+        # Cmax before one step
+        Cmax_before_one_step = self.env_rollout.current_objs.repeat_interleave(
+            repeats=torch.tensor(repeats, device=self.device)
         )
-        _Cmax_after_step = self.env_one_step.incumbent_objs
-        # print(_Cmax_after_step)
-        Cmax_decrease_label = (_Cmax_after_step < _Cmax_before_step)
-        # print(Cmax_decrease_label)
-        tabu_label = torch.cat([actions[0] for actions in current_action_set if actions], dim=0)[:, -1].bool()  # True: tabu
-        # print(tabu_label)
-        # print(current_action_set)
+
+        # Cmax after one step
+        G_expanded.edge_index = torch.cat([edge_index_disjunctions, G_expanded.edge_index_conjunctions], dim=1)
+        _, _, Cmax_after_one_step, _, _, _ = self.evaluator.eval(
+            G_expanded,
+            num_nodes_per_example=num_nodes_per_example_one_step
+        )
+
+        # Cmax improved flag, True(1) for improved
+        Cmax_improved_flag = torch.lt(Cmax_after_one_step, Cmax_before_one_step).int()
+
+        # tabu label
+        tabu_label = torch.cat([actions[0] for actions in current_action_set if actions], dim=0)[:, 2]
+
+        # compute aspiration
+        aspiration_flag = Cmax_improved_flag[action_exist]
+
+
+
+        print(tabu_label)
+        print(aspiration_flag)
+        print(Cmax_improved_flag)
+        print()
 
         selected_action = torch.cat([actions[0][[0], :2] for actions in current_action_set if actions], dim=0)
-        print(selected_action)
+        # print(selected_action)
 
         return selected_action
 

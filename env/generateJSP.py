@@ -13,7 +13,7 @@ def permute_rows(x):
 
 def uni_instance_gen(n_j, n_m, low, high):
     times = np.random.randint(low=low, high=high, size=(n_j, n_m))
-    machines = np.expand_dims(np.arange(0, n_m), axis=0).repeat(repeats=n_j, axis=0)
+    machines = np.expand_dims(np.arange(1, n_m+1), axis=0).repeat(repeats=n_j, axis=0)
     machines = permute_rows(machines)
     return times, machines
 
