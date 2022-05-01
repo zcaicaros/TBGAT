@@ -37,22 +37,22 @@ class TSN5:
             longest_path_finder='pytorch')
 
         while self.env_rollout.itr < 5:
-            selected_action = self.calculate_move(G, action_set, self.env_rollout.current_objs)
+            selected_action = self.calculate_move(G, self.env_rollout.current_objs, action_set)
             G, _, (action_set, _, _) = self.env_rollout.step(
                 action=selected_action,
                 prt=False,
                 show_action_space_compute_time=False
             )
 
-    def calculate_move(self, current_G, current_action_set, current_Cmax):
+    def calculate_move(self, current_sol, current_cmax, current_action_set):
 
         # sort edge_index otherwise to_data_list() fn will be messed and bug
-        current_G.edge_index = sort_edge_index(current_G.edge_index)
+        current_sol.edge_index = sort_edge_index(current_sol.edge_index)
         # sort edge_index_disjunctions otherwise to_data_list() fn will be messed and bug
-        current_G.edge_index_disjunctions = sort_edge_index(current_G.edge_index_disjunctions)
+        current_sol.edge_index_disjunctions = sort_edge_index(current_sol.edge_index_disjunctions)
 
         # copy G for one-step forward
-        G_list = current_G.to_data_list()
+        G_list = current_sol.to_data_list()
         num_nodes_per_example = torch.tensor([G.num_nodes for G in G_list], device=self.device)
         G_expanded = []
         repeats = []
@@ -120,7 +120,7 @@ class TSN5:
         )  # unsorted
 
         # Cmax before one step
-        Cmax_before_one_step = self.env_rollout.current_objs.repeat_interleave(
+        Cmax_before_one_step = current_cmax.repeat_interleave(
             repeats=torch.tensor(repeats, device=self.device)
         )
 
@@ -134,7 +134,7 @@ class TSN5:
         # Cmax improved flag, True(1) for improved
         Cmax_improved_flag = torch.lt(Cmax_after_one_step, Cmax_before_one_step).int()
 
-        # tabu label
+        # tabu label, True(1) for tabu
         tabu_label = torch.cat([actions[0] for actions in current_action_set if actions], dim=0)[:, 2]
 
         # compute aspiration
