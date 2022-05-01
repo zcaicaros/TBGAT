@@ -36,13 +36,19 @@ class TSN5:
             mask_previous_action=False,
             longest_path_finder='pytorch')
 
-        while self.env_rollout.itr < 5:
+        while self.env_rollout.itr < max(self.search_horizons):
             selected_action = self.calculate_move(G, self.env_rollout.current_objs, action_set)
             G, _, (action_set, _, _) = self.env_rollout.step(
                 action=selected_action,
                 prt=False,
                 show_action_space_compute_time=False
             )
+
+            for log_horizon in self.search_horizons:
+                if self.env_rollout.itr == log_horizon:
+                    tabu_result = self.env_rollout.incumbent_objs.cpu().squeeze().numpy()
+                    print('For testing steps: {}    '.format(self.env_rollout.itr if self.env_rollout.itr > 500 else ' ' + str(self.env_rollout.itr)),
+                          'Optimal Gap: {:.6f}    '.format(((tabu_result - gap_against) / gap_against).mean()))
 
     def calculate_move(self, current_sol, current_cmax, current_action_set):
 
@@ -131,26 +137,41 @@ class TSN5:
             num_nodes_per_example=num_nodes_per_example_one_step
         )
 
-        # Cmax improved flag, True(1) for improved
-        Cmax_improved_flag = torch.lt(Cmax_after_one_step, Cmax_before_one_step).int()
+        # compute tabu label
+        tabu_label_split = [actions[0][:, 2].bool() for actions in current_action_set if actions]
 
-        # tabu label, True(1) for tabu
-        tabu_label = torch.cat([actions[0] for actions in current_action_set if actions], dim=0)[:, 2]
+        # select action
+        splits_counts = [tb.shape[0] for tb in tabu_label_split]
+        action_set_wo_empty = [[action[0][:, :2]] for action in current_action_set if action]
+        Cmax_before_split = list(
+            torch.split(Cmax_before_one_step[action_exist], split_size_or_sections=splits_counts)
+        )
+        Cmax_after_split = list(
+            torch.split(Cmax_after_one_step[action_exist], split_size_or_sections=splits_counts)
+        )
+        selected_actions = []
+        for idx, (tb_label, Cmax_before, Cmax_after, action) in enumerate(
+                zip(tabu_label_split, Cmax_before_split, Cmax_after_split, action_set_wo_empty)
+        ):
+            action = action[0]  # get action tensor from list
 
-        # compute aspiration
-        aspiration_flag = Cmax_improved_flag[action_exist]
+            aspiration_flag = torch.lt(Cmax_after, Cmax_before).long()
+            if (~tb_label).sum() == 0 and aspiration_flag.sum() == 0:  # random select
+                selected_actions.append(random.choice([*action]))
+            elif (~tb_label).sum() != 0:
+                Cmax_after_non_tabu = Cmax_after[~tb_label]
+                action_index = Cmax_after_non_tabu.argmin(dim=0)
+                selected_actions.append(action[action_index])
+            else:
+                action_index = random.choice([*torch.where(aspiration_flag == 1)[0]])
+                selected_actions.append(action[action_index])
 
+        selected_actions = torch.stack(selected_actions)
 
-
-        print(tabu_label)
-        print(aspiration_flag)
-        print(Cmax_improved_flag)
-        print()
-
-        selected_action = torch.cat([actions[0][[0], :2] for actions in current_action_set if actions], dim=0)
+        # selected_action = torch.cat([actions[0][[0], :2] for actions in current_action_set if actions], dim=0)
         # print(selected_action)
 
-        return selected_action
+        return selected_actions
 
 
 if __name__ == '__main__':
@@ -160,12 +181,12 @@ if __name__ == '__main__':
     np.random.seed(seed)
     np.seterr(invalid='ignore')
 
-    dev = 'cpu' if torch.cuda.is_available() else 'cpu'
+    dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using to test TSN5...'.format(dev))
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['syn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+    testing_type = ['tai']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
     syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
     syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
     tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]
@@ -185,8 +206,7 @@ if __name__ == '__main__':
 
     # solver config
     taboo_size = 20
-    cap_horizon = 5000
-    performance_milestones = [1, 2, 3, 4]  # [500, 1000, 2000, 5000]
+    performance_milestones = [10 * i for i in range(1, 501)]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'current', 'incumbent'
 
     for test_t in testing_type:  # select benchmark
@@ -212,13 +232,13 @@ if __name__ == '__main__':
 
         for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-            # inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))[:2]
+            inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
-            from env.generateJSP import uni_instance_gen
-            j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
-            inst = [np.concatenate(
-                [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
-            ) for _ in range(batch_size)]
+            # from env.generateJSP import uni_instance_gen
+            # j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
+            # inst = [np.concatenate(
+            #     [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
+            # ) for _ in range(batch_size)]
 
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
