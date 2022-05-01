@@ -255,4 +255,4 @@ class NeuralTabu:
 
 if __name__ == '__main__':
     agent = NeuralTabu()
-    # agent.train()
+    agent.train()
