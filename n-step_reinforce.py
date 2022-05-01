@@ -20,14 +20,14 @@ class NeuralTabu:
         self.env_validation = Env()
         self.eps = np.finfo(np.float32).eps.item()
         self.algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
-                    # env parameters
-                    args.tabu_size,
-                    # model parameters
-                    args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
-                    # training parameters
-                    args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
-                    args.step_validation, args.ent_coeff
-                )
+            # env parameters
+            args.tabu_size,
+            # model parameters
+            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
+            # training parameters
+            args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
+            args.step_validation, args.ent_coeff
+        )
 
         # load or generate validation dataset
         validation_data_path = './validation_data/validation_data_and_Cmax_{}x{}_[{},{}].npy'.format(
@@ -159,9 +159,34 @@ class NeuralTabu:
 
         print()
         print("Use {} to train...".format(dev))
-        print("{}x{}, lr={}, batch-size={}, ent coeff={}, training horizon={}, update every {} transits.".format(
-            args.j, args.m, args.lr, args.batch_size, args.ent_coeff, args.transit, args.steps_learn)
-        )
+        print("{}x{}, "
+              "lr={}, "
+              "ent_coeff={}, "
+              "tabu_size={}, "
+              "hidden_channels={}, "
+              "out_channels={}, "
+              "heads={}, "
+              "dropout_for_gat={}, "
+              "steps_learn={}, "
+              "transit={}, "
+              "batch_size={}, "
+              "total_instances={}, "
+              "step_validation={}.".format(args.j,
+                                            args.m,
+                                            args.lr,
+                                            args.ent_coeff,
+                                            args.tabu_size,
+                                            args.hidden_channels,
+                                            args.out_channels,
+                                            args.heads,
+                                            args.dropout_for_gat,
+                                            args.steps_learn,
+                                            args.transit,
+                                            args.batch_size,
+                                            args.total_instances,
+                                            args.step_validation
+                                            )
+              )
         print()
 
         policy = Actor(
