@@ -150,10 +150,10 @@ class NeuralTabu:
     def train(self):
 
         # training seeds
-        torch.manual_seed(3456346)
-        random.seed(234234)
-        np.random.seed(34667)
-        torch.cuda.manual_seed_all(3456123)
+        torch.manual_seed(args.training_seed)
+        random.seed(args.training_seed)
+        np.random.seed(args.training_seed)
+        torch.cuda.manual_seed_all(args.training_seed)
 
         dev = 'cuda' if torch.cuda.is_available() else 'cpu'
 
