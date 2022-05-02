@@ -142,7 +142,7 @@ class Actor(torch.nn.Module):
 
         action_list_merged = [actions[0] for actions in feasible_action if actions]
 
-        # if [] then all instances are optimally solved
+        # if action_list_merged == [] then all instances are optimally solved; return dummy log_p and ent
         if not action_list_merged:
 
             return None, \
@@ -236,7 +236,7 @@ if __name__ == '__main__':
     # j, m, batch_size = {'low': 30, 'high': 31}, {'low': 20, 'high': 21}, 64
     # j, m, batch_size = {'low': 10, 'high': 11}, {'low': 10, 'high': 11}, 128
     # j, m, batch_size = {'low': 20, 'high': 21}, {'low': 15, 'high': 16}, 64
-    j, m, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 3
+    j, m, batch_size = {'low': 10, 'high': 11}, {'low': 10, 'high': 11}, 3
     # [j, m], batch_size = [np.array(
     #     [[15, 15],  # Taillard
     #      [20, 15],
@@ -342,18 +342,36 @@ if __name__ == '__main__':
 
     env.cpm_eval()
 
-    loss = log_p.mean()
+    # loss = log_p.mean()
+    # grad = torch.autograd.grad(loss, [param for param in net.parameters()])
 
-    grad = torch.autograd.grad(loss, [param for param in net.parameters()])
+    log_p_normal = log_p.clone()
 
-    sampled_a, log_p, ent = net(
-        pyg_sol=G,
-        feasible_action=[[], [], []],
-        optimal_mark=mark,
-        critical_path=paths
-    )
+    # parameter after backward with normal log_p
+    # import torch.optim as optim
+    # optimizer = optim.Adam(net.parameters(), lr=0.0001)
+    # print(log_p_normal)
+    # loss = log_p_normal.mean()
+    # # backward
+    # optimizer.zero_grad()
+    # loss.backward()
+    # optimizer.step()
+    # print([param for param in net.parameters()])
 
-    print(log_p)
-
-    loss = log_p.mean()
-    loss.backward()
+    # parameter after backward with mean of dummy log_p and normal log_p, should be equal with that of normal log_p,
+    # since dummy log_p affect nothing
+    # sampled_a, log_p_dummy, ent = net(
+    #     pyg_sol=G,
+    #     feasible_action=[[], [], []],
+    #     optimal_mark=mark,
+    #     critical_path=paths
+    # )
+    # import torch.optim as optim
+    # optimizer = optim.Adam(net.parameters(), lr=0.0001)
+    # loss = log_p_dummy + log_p_normal
+    # # backward
+    # optimizer.zero_grad()
+    # loss.mean().backward()
+    # optimizer.step()
+    # print([param for param in net.parameters()])
+    
