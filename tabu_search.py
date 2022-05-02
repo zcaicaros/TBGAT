@@ -1,10 +1,9 @@
-import torch_geometric.utils
-
 from env.message_passing_evl import MassagePassingEval
 from torch_geometric.utils import sort_edge_index
 from torch_geometric.data.batch import Batch
 from ortools_solver import MinimalJobshopSat
 from env.environment import Env
+from parameters import args
 import numpy as np
 import random
 import torch
@@ -182,64 +181,56 @@ if __name__ == '__main__':
     np.seterr(invalid='ignore')
 
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print('using to test TSN5...'.format(dev))
-
-    # benchmark config
-    init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['ft']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
-    syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
-    syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
-    tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]
-    tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]
-    abz_problem_j = [10, 20]
-    abz_problem_m = [10, 15]
-    orb_problem_j = [10]
-    orb_problem_m = [10]
-    yn_problem_j = [20]
-    yn_problem_m = [20]
-    swv_problem_j = [20, 20, 50]
-    swv_problem_m = [10, 15, 10]
-    la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
-    la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
-    ft_problem_j = [6, 10, 20]  # [6, 10, 20]
-    ft_problem_m = [6, 10, 5]  # [6, 10, 5]
+    print('using to {} test TSN5...'.format(dev))
 
     # solver config
     taboo_size = 5
     performance_milestones = [10 * i for i in range(1, 501)]  # [500, 1000, 2000, 5000]
-    result_type = 'incumbent'  # 'current', 'incumbent'
 
-    for test_t in testing_type:  # select benchmark
-        if test_t == 'syn':
-            problem_j, problem_m = syn_problem_j, syn_problem_m
-        elif test_t == 'tai':
-            problem_j, problem_m = tai_problem_j, tai_problem_m
-        elif test_t == 'abz':
-            problem_j, problem_m = abz_problem_j, abz_problem_m
-        elif test_t == 'orb':
-            problem_j, problem_m = orb_problem_j, orb_problem_m
-        elif test_t == 'yn':
-            problem_j, problem_m = yn_problem_j, yn_problem_m
-        elif test_t == 'swv':
-            problem_j, problem_m = swv_problem_j, swv_problem_m
-        elif test_t == 'la':
-            problem_j, problem_m = la_problem_j, la_problem_m
-        elif test_t == 'ft':
-            problem_j, problem_m = ft_problem_j, ft_problem_m
+    if args.test_specific_size:
+        test_instance_size = [p_j, p_m] = [args.t_j, args.t_m]
+        if not args.test_synthetic:
+            print('Testing all open benchmark of size {}.'.format(test_instance_size))
+            if test_instance_size == [6, 6]:
+                testing_type = ['ft']
+            elif test_instance_size == [10, 5]:
+                testing_type = ['la']
+            elif test_instance_size == [10, 10]:
+                testing_type = ['abz', 'ft', 'la', 'orb']
+            elif test_instance_size == [15, 5]:
+                testing_type = ['la']
+            elif test_instance_size == [15, 10]:
+                testing_type = ['la']
+            elif test_instance_size == [15, 15]:
+                testing_type = ['tai', 'la']
+            elif test_instance_size == [20, 5]:
+                testing_type = ['ft']
+            elif test_instance_size == [20, 10]:
+                testing_type = ['la', 'swv']
+            elif test_instance_size == [20, 15]:
+                testing_type = ['tai', 'abz', 'swv']
+            elif test_instance_size == [20, 20]:
+                testing_type = ['tai', 'yn']
+            elif test_instance_size == [30, 10]:
+                testing_type = ['la']
+            elif test_instance_size == [30, 15]:
+                testing_type = ['tai']
+            elif test_instance_size == [50, 10]:
+                testing_type = ['swv']
+            elif test_instance_size == [50, 15]:
+                testing_type = ['tai']
+            elif test_instance_size == [50, 20]:
+                testing_type = ['tai']
+            elif test_instance_size == [100, 20]:
+                testing_type = ['tai']
+            else:
+                raise RuntimeError('Open benchmark has no instances of size: {}.'.format(test_instance_size))
         else:
-            raise Exception(
-                'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn"].')
+            testing_type = ['syn']
+            print('Testing syn of size {}.'.format(test_instance_size))
 
-        for p_j, p_m in zip(problem_j, problem_m):  # select problem size
-
+        for test_t in testing_type:  # select benchmark
             inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
-
-            # from env.generateJSP import uni_instance_gen
-            # j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
-            # inst = [np.concatenate(
-            #     [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
-            # ) for _ in range(batch_size)]
-
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
             # read saved gap_against or use ortools to solve it.
@@ -269,3 +260,86 @@ if __name__ == '__main__':
             # start to test
             solver = TSN5(instances=inst, search_horizons=performance_milestones, tabu_size=taboo_size, device=dev)
             solver.solve()
+
+    # testing all benchmark
+    else:
+        # benchmark config
+        init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
+        testing_type = ['ft']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+        syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
+        syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
+        tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]
+        tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]
+        abz_problem_j = [10, 20]
+        abz_problem_m = [10, 15]
+        orb_problem_j = [10]
+        orb_problem_m = [10]
+        yn_problem_j = [20]
+        yn_problem_m = [20]
+        swv_problem_j = [20, 20, 50]
+        swv_problem_m = [10, 15, 10]
+        la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
+        la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
+        ft_problem_j = [6, 10, 20]  # [6, 10, 20]
+        ft_problem_m = [6, 10, 5]  # [6, 10, 5]
+
+        for test_t in testing_type:  # select benchmark
+            if test_t == 'syn':
+                problem_j, problem_m = syn_problem_j, syn_problem_m
+            elif test_t == 'tai':
+                problem_j, problem_m = tai_problem_j, tai_problem_m
+            elif test_t == 'abz':
+                problem_j, problem_m = abz_problem_j, abz_problem_m
+            elif test_t == 'orb':
+                problem_j, problem_m = orb_problem_j, orb_problem_m
+            elif test_t == 'yn':
+                problem_j, problem_m = yn_problem_j, yn_problem_m
+            elif test_t == 'swv':
+                problem_j, problem_m = swv_problem_j, swv_problem_m
+            elif test_t == 'la':
+                problem_j, problem_m = la_problem_j, la_problem_m
+            elif test_t == 'ft':
+                problem_j, problem_m = ft_problem_j, ft_problem_m
+            else:
+                raise Exception(
+                    'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn"].')
+
+            for p_j, p_m in zip(problem_j, problem_m):  # select problem size
+
+                inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+
+                # from env.generateJSP import uni_instance_gen
+                # j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
+                # inst = [np.concatenate(
+                #     [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
+                # ) for _ in range(batch_size)]
+
+                print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
+
+                # read saved gap_against or use ortools to solve it.
+                if test_t != 'syn':
+                    gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                else:
+                    # ortools solver
+                    from pathlib import Path
+
+                    ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    if ortools_path.is_file():
+                        gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    else:
+                        ortools_results = []
+                        print('Starting Ortools...')
+                        for i, data in enumerate(inst):
+                            times_rearrange = np.expand_dims(data[0], axis=-1)
+                            machines_rearrange = np.expand_dims(data[1], axis=-1)
+                            data = np.concatenate((machines_rearrange, times_rearrange), axis=-1)
+                            result = MinimalJobshopSat(data.tolist())
+                            print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
+                            ortools_results.append(result)
+                        ortools_results = np.array(ortools_results)
+                        np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
+                        gap_against = ortools_results[:, 1]
+
+                # start to test
+                solver = TSN5(instances=inst, search_horizons=performance_milestones, tabu_size=taboo_size, device=dev)
+                solver.solve()

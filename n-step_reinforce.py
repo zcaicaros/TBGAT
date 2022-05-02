@@ -172,20 +172,20 @@ class NeuralTabu:
               "batch_size={}, "
               "total_instances={}, "
               "step_validation={}.".format(args.j,
-                                            args.m,
-                                            args.lr,
-                                            args.ent_coeff,
-                                            args.tabu_size,
-                                            args.hidden_channels,
-                                            args.out_channels,
-                                            args.heads,
-                                            args.dropout_for_gat,
-                                            args.steps_learn,
-                                            args.transit,
-                                            args.batch_size,
-                                            args.total_instances,
-                                            args.step_validation
-                                            )
+                                           args.m,
+                                           args.lr,
+                                           args.ent_coeff,
+                                           args.tabu_size,
+                                           args.hidden_channels,
+                                           args.out_channels,
+                                           args.heads,
+                                           args.dropout_for_gat,
+                                           args.steps_learn,
+                                           args.transit,
+                                           args.batch_size,
+                                           args.total_instances,
+                                           args.step_validation
+                                           )
               )
         print()
 
