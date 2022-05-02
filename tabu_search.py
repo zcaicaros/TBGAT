@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
     # benchmark config
     init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-    testing_type = ['tai']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+    testing_type = ['ft']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
     syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
     syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
     tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     ft_problem_m = [6, 10, 5]  # [6, 10, 5]
 
     # solver config
-    taboo_size = 20
+    taboo_size = 5
     performance_milestones = [10 * i for i in range(1, 501)]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'current', 'incumbent'
 
