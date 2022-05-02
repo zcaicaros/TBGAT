@@ -346,6 +346,7 @@ if __name__ == '__main__':
     # grad = torch.autograd.grad(loss, [param for param in net.parameters()])
 
     log_p_normal = log_p.clone()
+    # print(log_p_normal)
 
     # parameter after backward with normal log_p
     # import torch.optim as optim
@@ -368,10 +369,9 @@ if __name__ == '__main__':
     # )
     # import torch.optim as optim
     # optimizer = optim.Adam(net.parameters(), lr=0.0001)
-    # loss = log_p_dummy + log_p_normal
+    # loss = torch.cat([log_p_dummy, log_p_normal], dim=-1).sum(dim=-1)
     # # backward
     # optimizer.zero_grad()
     # loss.mean().backward()
     # optimizer.step()
     # print([param for param in net.parameters()])
-    
