@@ -145,7 +145,19 @@ class Actor(torch.nn.Module):
         # if [] then all instances are optimally solved
         if not action_list_merged:
 
-            return None, None, None
+            return None, \
+                   torch.zeros(
+                       size=[len(feasible_action), 1],
+                       dtype=torch.float,
+                       device=pyg_sol.edge_index.device,
+                       requires_grad=True
+                   ), \
+                   torch.zeros(
+                       size=[len(feasible_action), 1],
+                       dtype=torch.float,
+                       device=pyg_sol.edge_index.device,
+                       requires_grad=True
+                   )
 
         else:
             x = pyg_sol.x
@@ -331,4 +343,17 @@ if __name__ == '__main__':
     env.cpm_eval()
 
     loss = log_p.mean()
+
     grad = torch.autograd.grad(loss, [param for param in net.parameters()])
+
+    sampled_a, log_p, ent = net(
+        pyg_sol=G,
+        feasible_action=[[], [], []],
+        optimal_mark=mark,
+        critical_path=paths
+    )
+
+    print(log_p)
+
+    loss = log_p.mean()
+    loss.backward()

@@ -14,3 +14,9 @@ from tqdm import tqdm
 
 t = torch.tensor([True, False])
 print((~t).sum())
+
+torch.cat([torch.tensor(1), None])
+
+print([None, None])
+if [None, None]:
+    print('yes')
