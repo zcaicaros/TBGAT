@@ -1,0 +1,7 @@
+Start testing la15x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x10-1e-05-10-500-64-32000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.049796     Average Time: 3.4079
+For testing steps: 1000     Optimal Gap: 0.038550     Average Time: 6.6564
+For testing steps: 2000     Optimal Gap: 0.029835     Average Time: 13.2617
+For testing steps: 5000     Optimal Gap: 0.019919     Average Time: 33.2354

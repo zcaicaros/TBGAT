@@ -1,0 +1,7 @@
+Start testing tai30x15...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_30x15-1e-05-10-500-64-32000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.132602     Average Time: 3.0627
+For testing steps: 1000     Optimal Gap: 0.107420     Average Time: 6.0158
+For testing steps: 2000     Optimal Gap: 0.088929     Average Time: 11.8648
+For testing steps: 5000     Optimal Gap: 0.072110     Average Time: 29.2039
