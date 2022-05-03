@@ -1,0 +1,15 @@
+Start testing ft20x5...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x5-1e-05-10-500-64-32000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.074678     Average Time: 18.3360
+For testing steps: 1000     Optimal Gap: 0.040343     Average Time: 35.5621
+For testing steps: 2000     Optimal Gap: 0.022318     Average Time: 69.6728
+For testing steps: 5000     Optimal Gap: 0.017167     Average Time: 171.7383
+
+Start testing la20x5...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x5-1e-05-10-500-64-32000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.000000     Average Time: 2.7913
+For testing steps: 1000     Optimal Gap: 0.000000     Average Time: 5.2657
+For testing steps: 2000     Optimal Gap: 0.000000     Average Time: 10.2329
+For testing steps: 5000     Optimal Gap: 0.000000     Average Time: 25.0564
