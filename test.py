@@ -22,7 +22,7 @@ def main():
     cap_horizon = 5000
     performance_milestones = [500, 1000, 2000, 5000]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'last_step', 'incumbent'
-    init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
+    init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
     # which model to load
     algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
@@ -121,51 +121,50 @@ def main():
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 
-            for init in init_type:
-                torch.manual_seed(seed)
-                torch.cuda.manual_seed_all(seed)
-                print('Starting rollout DRL policy...')
-                results_each_init, inference_time_each_init = [], []
-                # t3 = time.time()
-                result, computation_time = [], []
-                G, (action_set, optimal_mark, paths) = env.reset(
-                    instances=inst,
-                    init_sol_type=init,
-                    tabu_size=args.tabu_size,
-                    device=dev,
-                    mask_previous_action=args.mask_previous_action == 'True',
-                    longest_path_finder=args.path_finder)
-                # t4 = time.time()
-                drl_start = time.time()
-                while env.itr < cap_horizon:
-                    # t1 = time.time()
-                    sampled_a, log_p, ent = policy(
-                        pyg_sol=G,
-                        feasible_action=action_set,
-                        optimal_mark=optimal_mark,
-                        critical_path=paths
-                    )
+            torch.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            print('Starting rollout DRL policy...')
+            results_each_init, inference_time_each_init = [], []
+            # t3 = time.time()
+            result, computation_time = [], []
+            G, (action_set, optimal_mark, paths) = env.reset(
+                instances=inst,
+                init_sol_type=init,
+                tabu_size=args.tabu_size,
+                device=dev,
+                mask_previous_action=args.mask_previous_action == 'True',
+                longest_path_finder=args.path_finder)
+            # t4 = time.time()
+            drl_start = time.time()
+            while env.itr < cap_horizon:
+                # t1 = time.time()
+                sampled_a, log_p, ent = policy(
+                    pyg_sol=G,
+                    feasible_action=action_set,
+                    optimal_mark=optimal_mark,
+                    critical_path=paths
+                )
 
-                    G, reward, (action_set, optimal_mark, paths) = env.step(
-                        action=sampled_a,
-                        prt=False,
-                        show_action_space_compute_time=False
-                    )
+                G, reward, (action_set, optimal_mark, paths) = env.step(
+                    action=sampled_a,
+                    prt=False,
+                    show_action_space_compute_time=False
+                )
 
-                    # t2 = time.time()
-                    for log_horizon in performance_milestones:
-                        if env.itr == log_horizon:
-                            if result_type == 'incumbent':
-                                DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
-                            else:
-                                DRL_result = env.current_objs.cpu().squeeze().numpy()
-                            result.append(DRL_result)
-                            computation_time.append(time.time() - drl_start)
-                            print('For testing steps: {}    '.format(env.itr if env.itr > 500 else ' ' + str(env.itr)),
-                                  'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
-                                  'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
-                results_each_init.append(np.stack(result))
-                inference_time_each_init.append(np.array(computation_time))
+                # t2 = time.time()
+                for log_horizon in performance_milestones:
+                    if env.itr == log_horizon:
+                        if result_type == 'incumbent':
+                            DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
+                        else:
+                            DRL_result = env.current_objs.cpu().squeeze().numpy()
+                        result.append(DRL_result)
+                        computation_time.append(time.time() - drl_start)
+                        print('For testing steps: {}    '.format(env.itr if env.itr > 500 else ' ' + str(env.itr)),
+                              'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
+                              'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
+            results_each_init.append(np.stack(result))
+            inference_time_each_init.append(np.array(computation_time))
     # testing all benchmark
     else:
         print('Testing all instances of all sizes.')
@@ -186,6 +185,8 @@ def main():
         yn_problem_m = [20]
         syn_problem_j = [10, 15, 15, 20, 20, 100, 150]  # [10, 15, 15, 20, 20, 100, 150]
         syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
+
+        results_total = []
 
         for test_t in testing_type:  # select benchmark
             if test_t == 'syn':
@@ -251,53 +252,53 @@ def main():
                 print('loading model from:', saved_model_path)
                 policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 
-                for init in init_type:
-                    torch.manual_seed(seed)
-                    torch.cuda.manual_seed_all(seed)
-                    print('Starting rollout DRL policy...')
-                    results_each_init, inference_time_each_init = [], []
-                    # t3 = time.time()
-                    result, computation_time = [], []
-                    G, (action_set, optimal_mark, paths) = env.reset(
-                        instances=inst,
-                        init_sol_type=init,
-                        tabu_size=args.tabu_size,
-                        device=dev,
-                        mask_previous_action=args.mask_previous_action == 'True',
-                        longest_path_finder=args.path_finder)
-                    # t4 = time.time()
-                    drl_start = time.time()
-                    while env.itr < cap_horizon:
-                        # t1 = time.time()
-                        sampled_a, log_p, ent = policy(
-                            pyg_sol=G,
-                            feasible_action=action_set,
-                            optimal_mark=optimal_mark,
-                            critical_path=paths
-                        )
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed_all(seed)
+                print('Starting rollout DRL policy...')
+                results_each_init, inference_time_each_init = [], []
+                # t3 = time.time()
+                result, computation_time = [], []
+                G, (action_set, optimal_mark, paths) = env.reset(
+                    instances=inst,
+                    init_sol_type=init,
+                    tabu_size=args.tabu_size,
+                    device=dev,
+                    mask_previous_action=args.mask_previous_action == 'True',
+                    longest_path_finder=args.path_finder)
+                # t4 = time.time()
+                drl_start = time.time()
+                while env.itr < cap_horizon:
+                    # t1 = time.time()
+                    sampled_a, log_p, ent = policy(
+                        pyg_sol=G,
+                        feasible_action=action_set,
+                        optimal_mark=optimal_mark,
+                        critical_path=paths
+                    )
 
-                        G, reward, (action_set, optimal_mark, paths) = env.step(
-                            action=sampled_a,
-                            prt=False,
-                            show_action_space_compute_time=False
-                        )
+                    G, reward, (action_set, optimal_mark, paths) = env.step(
+                        action=sampled_a,
+                        prt=False,
+                        show_action_space_compute_time=False
+                    )
 
-                        # t2 = time.time()
-                        for log_horizon in performance_milestones:
-                            if env.itr == log_horizon:
-                                if result_type == 'incumbent':
-                                    DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
-                                else:
-                                    DRL_result = env.current_objs.cpu().squeeze().numpy()
-                                result.append(DRL_result)
-                                computation_time.append(time.time() - drl_start)
-                                print('For testing steps: {}    '.format(
-                                    env.itr if env.itr > 500 else ' ' + str(env.itr)),
-                                      'Optimal Gap: {:.6f}    '.format(
-                                          ((DRL_result - gap_against) / gap_against).mean()),
-                                      'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
-                    results_each_init.append(np.stack(result))
-                    inference_time_each_init.append(np.array(computation_time))
+                    # t2 = time.time()
+                    for log_horizon in performance_milestones:
+                        if env.itr == log_horizon:
+                            if result_type == 'incumbent':
+                                DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
+                            else:
+                                DRL_result = env.current_objs.cpu().squeeze().numpy()
+                            result.append(DRL_result)
+                            computation_time.append(time.time() - drl_start)
+                            print('For testing steps: {}    '.format(
+                                env.itr if env.itr > 500 else ' ' + str(env.itr)),
+                                  'Optimal Gap: {:.6f}    '.format(
+                                      ((DRL_result - gap_against) / gap_against).mean()),
+                                  'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
+                            results_total.append(DRL_result)
+                results_each_init.append(np.stack(result))
+                inference_time_each_init.append(np.array(computation_time))
 
 
 if __name__ == '__main__':

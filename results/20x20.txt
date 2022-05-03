@@ -1,0 +1,15 @@
+Start testing tai20x20...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x20-1e-05-10-500-64-32000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.106173     Average Time: 2.9079
+For testing steps: 1000     Optimal Gap: 0.093702     Average Time: 5.6974
+For testing steps: 2000     Optimal Gap: 0.080832     Average Time: 11.2401
+For testing steps: 5000     Optimal Gap: 0.064665     Average Time: 27.9516
+
+Start testing yn20x20...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x20-1e-05-10-500-64-32000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.107582     Average Time: 6.2727
+For testing steps: 1000     Optimal Gap: 0.085224     Average Time: 12.3444
+For testing steps: 2000     Optimal Gap: 0.075739     Average Time: 24.4214
+For testing steps: 5000     Optimal Gap: 0.061780     Average Time: 59.8990
