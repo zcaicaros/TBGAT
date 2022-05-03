@@ -53,7 +53,7 @@ def main():
             elif test_instance_size == [15, 15]:
                 testing_type = ['tai', 'la']
             elif test_instance_size == [20, 5]:
-                testing_type = ['ft']
+                testing_type = ['ft', 'la']
             elif test_instance_size == [20, 10]:
                 testing_type = ['la', 'swv']
             elif test_instance_size == [20, 15]:

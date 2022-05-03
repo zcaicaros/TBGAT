@@ -402,7 +402,7 @@ class Env:
                 if not action:  # if all optimal do nothing
                     self.itr += 1
                     return self.G_batch, \
-                           self.incumbent_objs - self.incumbent_objs, \
+                           (self.incumbent_objs - self.incumbent_objs).unsqueeze(-1), \
                            self.get_candidate_moves(prt=show_action_space_compute_time)
                 action = torch.stack(action)
             t2_ = time.time()

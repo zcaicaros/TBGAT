@@ -361,7 +361,7 @@ if __name__ == '__main__':
 
     # parameter after backward with mean of dummy log_p and normal log_p, should be equal with that of normal log_p,
     # since dummy log_p affect nothing
-    # sampled_a, log_p_dummy, ent = net(
+    # sampled_a, log_p_dummy, ent_dummy = net(
     #     pyg_sol=G,
     #     feasible_action=[[], [], []],
     #     optimal_mark=mark,
