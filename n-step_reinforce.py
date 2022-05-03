@@ -105,7 +105,7 @@ class NeuralTabu:
             init_sol_type=args.init_type,
             tabu_size=args.tabu_size,
             device=dev,
-            mask_previous_action=args.mask_previous_action,
+            mask_previous_action=args.mask_previous_action == 'True',
             longest_path_finder=args.path_finder
         )
 
@@ -219,7 +219,7 @@ class NeuralTabu:
                 init_sol_type=args.init_type,
                 tabu_size=args.tabu_size,
                 device=dev,
-                mask_previous_action=args.mask_previous_action,
+                mask_previous_action=args.mask_previous_action == 'True',
                 longest_path_finder=args.path_finder)
 
             reward_buffer = []

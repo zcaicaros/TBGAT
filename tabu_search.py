@@ -32,7 +32,7 @@ class TSN5:
             init_sol_type='fdd-divide-wkr',
             tabu_size=self.tabu_size,
             device=self.device,
-            mask_previous_action=False,
+            mask_previous_action=args.mask_previous_action == 'True',
             longest_path_finder='pytorch')
 
         while self.env_rollout.itr < max(self.search_horizons):

@@ -36,9 +36,9 @@ def main():
     )
 
     # testing specific size
-    if args.test_specific_size:
+    if args.test_specific_size == 'True':
         test_instance_size = [p_j, p_m] = [args.t_j, args.t_m]
-        if not args.test_synthetic:
+        if args.test_synthetic == 'False':
             print('Testing all open benchmark of size {}.'.format(test_instance_size))
             if test_instance_size == [6, 6]:
                 testing_type = ['ft']
@@ -133,7 +133,7 @@ def main():
                     init_sol_type=init,
                     tabu_size=args.tabu_size,
                     device=dev,
-                    mask_previous_action=args.mask_previous_action,
+                    mask_previous_action=args.mask_previous_action == 'True',
                     longest_path_finder=args.path_finder)
                 # t4 = time.time()
                 drl_start = time.time()
@@ -263,7 +263,7 @@ def main():
                         init_sol_type=init,
                         tabu_size=args.tabu_size,
                         device=dev,
-                        mask_previous_action=args.mask_previous_action,
+                        mask_previous_action=args.mask_previous_action == 'True',
                         longest_path_finder=args.path_finder)
                     # t4 = time.time()
                     drl_start = time.time()
