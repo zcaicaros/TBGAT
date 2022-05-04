@@ -6,6 +6,7 @@ from env.environment import Env
 from model.actor import Actor
 from ortools_solver import MinimalJobshopSat
 from parameters import args
+import pandas as pd
 
 
 def main():
@@ -124,7 +125,6 @@ def main():
             torch.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
             print('Starting rollout DRL policy...')
-            results_each_init, inference_time_each_init = [], []
             # t3 = time.time()
             result, computation_time = [], []
             G, (action_set, optimal_mark, paths) = env.reset(
@@ -163,8 +163,6 @@ def main():
                         print('For testing steps: {}    '.format(env.itr if env.itr > 500 else ' ' + str(env.itr)),
                               'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
                               'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
-            results_each_init.append(np.stack(result))
-            inference_time_each_init.append(np.array(computation_time))
     # testing all benchmark
     else:
         print('Testing all instances of all sizes.')
@@ -186,7 +184,8 @@ def main():
         syn_problem_j = [10, 15, 15, 20, 20, 100, 150]  # [10, 15, 15, 20, 20, 100, 150]
         syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
 
-        results_total = []
+        mean_gap_all = []
+        csv_index = []
 
         for test_t in testing_type:  # select benchmark
             if test_t == 'syn':
@@ -208,6 +207,8 @@ def main():
             else:
                 raise Exception(
                     'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn"].')
+
+            mean_gap_each_bench = []
 
             for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
@@ -255,7 +256,6 @@ def main():
                 torch.manual_seed(seed)
                 torch.cuda.manual_seed_all(seed)
                 print('Starting rollout DRL policy...')
-                results_each_init, inference_time_each_init = [], []
                 # t3 = time.time()
                 result, computation_time = [], []
                 G, (action_set, optimal_mark, paths) = env.reset(
@@ -266,6 +266,9 @@ def main():
                     mask_previous_action=args.mask_previous_action == 'True',
                     longest_path_finder=args.path_finder)
                 # t4 = time.time()
+
+                mean_gap_each_size = []
+
                 drl_start = time.time()
                 while env.itr < cap_horizon:
                     # t1 = time.time()
@@ -285,6 +288,7 @@ def main():
                     # t2 = time.time()
                     for log_horizon in performance_milestones:
                         if env.itr == log_horizon:
+                            csv_index.append('{} {}x{} {}'.format(test_t, p_j, p_m, log_horizon))
                             if result_type == 'incumbent':
                                 DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
                             else:
@@ -296,9 +300,16 @@ def main():
                                   'Optimal Gap: {:.6f}    '.format(
                                       ((DRL_result - gap_against) / gap_against).mean()),
                                   'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
-                            results_total.append(DRL_result)
-                results_each_init.append(np.stack(result))
-                inference_time_each_init.append(np.array(computation_time))
+                            mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
+                mean_gap_each_bench.append(np.array(mean_gap_each_size).reshape(-1, 1))
+            mean_gap_all.append(np.concatenate(mean_gap_each_bench, axis=0))
+            mean_gap_all.append(np.array([[-1]], dtype=float))
+            csv_index.append('dummy')
+        mean_gap_all = np.concatenate(mean_gap_all, axis=0)
+        print(mean_gap_all)
+        dataFrame = pd.DataFrame(mean_gap_all, index=csv_index, columns=['{}x{}'.format(args.j, args.m)])
+        with pd.ExcelWriter('./excel/mean_gap_all_{}x{}.xlsx'.format(args.j, args.m)) as writer:  # writing to excel
+            dataFrame.to_excel(writer, sheet_name='page1', float_format='%.8f')  # page 1
 
 
 if __name__ == '__main__':

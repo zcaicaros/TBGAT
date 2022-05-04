@@ -65,6 +65,8 @@ RUN ~/${project}-miniconda-environment/bin/pip install \
     # install matplotlib
     && ~/${project}-miniconda-environment/bin/pip install matplotlib==${matplotlib_ver} \
     # install ortools using pip
-    && ~/${project}-miniconda-environment/bin/pip install ortools==${ortools_ver}
+    && ~/${project}-miniconda-environment/bin/pip install ortools==${ortools_ver} \
+    # install openpyxl using pip
+    && ~/${project}-miniconda-environment/bin/pip install openpyxl
 
 
