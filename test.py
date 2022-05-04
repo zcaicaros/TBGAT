@@ -172,21 +172,21 @@ def main():
         # should be manually set to the size of model you have trained, see 'saved_model' folder.
         model_size = [
             [6, 6],
-            [10, 5]
-            # [10, 10],
-            # [15, 5],
-            # [15, 10],
-            # [15, 15],
-            # [20, 5],
-            # [20, 10],
-            # [20, 15],
-            # [20, 20],
-            # [30, 10],
-            # [30, 15],
-            # [30, 20],
-            # [50, 10],
-            # [50, 15],
-            # [50, 20],
+            [10, 5],
+            [10, 10],
+            [15, 5],
+            [15, 10],
+            [15, 15],
+            [20, 5],
+            [20, 10],
+            [20, 15],
+            [20, 20],
+            [30, 10],
+            [30, 15],
+            [30, 20],
+            [50, 10],
+            [50, 15],
+            [50, 20],
         ]
 
         mean_gap_all_model_all_benchmark = []
@@ -194,7 +194,7 @@ def main():
 
         for [model_j, model_m] in model_size:
 
-            testing_type = ['abz', 'orb']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+            testing_type = ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
             tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
             tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
             abz_problem_j = [10, 20]  # [10, 20]
