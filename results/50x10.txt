@@ -5,3 +5,14 @@ For testing steps:  500     Optimal Gap: 0.204776     Average Time: 5.3660
 For testing steps: 1000     Optimal Gap: 0.192918     Average Time: 10.6781
 For testing steps: 2000     Optimal Gap: 0.176747     Average Time: 21.0330
 For testing steps: 5000     Optimal Gap: 0.152672     Average Time: 51.6233
+
+
+
+
+Start testing swv50x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_50x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.199898     Average Time: 5.3180
+For testing steps: 1000     Optimal Gap: 0.185091     Average Time: 10.4658
+For testing steps: 2000     Optimal Gap: 0.170055     Average Time: 20.7113
+For testing steps: 5000     Optimal Gap: 0.144813     Average Time: 50.8686

@@ -65,6 +65,8 @@ def main():
                 testing_type = ['la']
             elif test_instance_size == [30, 15]:
                 testing_type = ['tai']
+            elif test_instance_size == [30, 20]:
+                testing_type = ['tai']
             elif test_instance_size == [50, 10]:
                 testing_type = ['swv']
             elif test_instance_size == [50, 15]:
@@ -165,150 +167,189 @@ def main():
                               'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
     # testing all benchmark
     else:
-        print('Testing all instances of all sizes.')
-        testing_type = ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
-        tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
-        tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
-        abz_problem_j = [10, 20]  # [10, 20]
-        abz_problem_m = [10, 15]  # [10, 15]
-        ft_problem_j = [6, 10, 20]  # [6, 10, 20]
-        ft_problem_m = [6, 10, 5]  # [6, 10, 5]
-        la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
-        la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
-        swv_problem_j = [20, 20, 50]  # [20, 20, 50]
-        swv_problem_m = [10, 15, 10]  # [10, 15, 10]
-        orb_problem_j = [10]
-        orb_problem_m = [10]
-        yn_problem_j = [20]
-        yn_problem_m = [20]
-        syn_problem_j = [10, 15, 15, 20, 20, 100, 150]  # [10, 15, 15, 20, 20, 100, 150]
-        syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
+        print('Testing all instances of all sizes using all models.')
 
-        mean_gap_all = []
+        # should be manually set to the size of model you have trained, see 'saved_model' folder.
+        model_size = [
+            [6, 6],
+            [10, 5]
+            # [10, 10],
+            # [15, 5],
+            # [15, 10],
+            # [15, 15],
+            # [20, 5],
+            # [20, 10],
+            # [20, 15],
+            # [20, 20],
+            # [30, 10],
+            # [30, 15],
+            # [30, 20],
+            # [50, 10],
+            # [50, 15],
+            # [50, 20],
+        ]
+
+        mean_gap_all_model_all_benchmark = []
         csv_index = []
 
-        for test_t in testing_type:  # select benchmark
-            if test_t == 'syn':
-                problem_j, problem_m = syn_problem_j, syn_problem_m
-            elif test_t == 'tai':
-                problem_j, problem_m = tai_problem_j, tai_problem_m
-            elif test_t == 'abz':
-                problem_j, problem_m = abz_problem_j, abz_problem_m
-            elif test_t == 'orb':
-                problem_j, problem_m = orb_problem_j, orb_problem_m
-            elif test_t == 'yn':
-                problem_j, problem_m = yn_problem_j, yn_problem_m
-            elif test_t == 'swv':
-                problem_j, problem_m = swv_problem_j, swv_problem_m
-            elif test_t == 'la':
-                problem_j, problem_m = la_problem_j, la_problem_m
-            elif test_t == 'ft':
-                problem_j, problem_m = ft_problem_j, ft_problem_m
-            else:
-                raise Exception(
-                    'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn"].')
+        for [model_j, model_m] in model_size:
 
-            mean_gap_each_bench = []
+            testing_type = ['abz', 'orb']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+            tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
+            tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
+            abz_problem_j = [10, 20]  # [10, 20]
+            abz_problem_m = [10, 15]  # [10, 15]
+            ft_problem_j = [6, 10, 20]  # [6, 10, 20]
+            ft_problem_m = [6, 10, 5]  # [6, 10, 5]
+            la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
+            la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
+            swv_problem_j = [20, 20, 50]  # [20, 20, 50]
+            swv_problem_m = [10, 15, 10]  # [10, 15, 10]
+            orb_problem_j = [10]
+            orb_problem_m = [10]
+            yn_problem_j = [20]
+            yn_problem_m = [20]
+            syn_problem_j = [10, 15, 15, 20, 20, 100, 150]  # [10, 15, 15, 20, 20, 100, 150]
+            syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
 
-            for p_j, p_m in zip(problem_j, problem_m):  # select problem size
+            mean_gap_all_benchmark = []
 
-                inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
-
-                print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
-
-                # read saved gap_against or use ortools to solve it.
-                if test_t != 'syn':
-                    gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+            for test_t in testing_type:  # select benchmark
+                if test_t == 'syn':
+                    problem_j, problem_m = syn_problem_j, syn_problem_m
+                elif test_t == 'tai':
+                    problem_j, problem_m = tai_problem_j, tai_problem_m
+                elif test_t == 'abz':
+                    problem_j, problem_m = abz_problem_j, abz_problem_m
+                elif test_t == 'orb':
+                    problem_j, problem_m = orb_problem_j, orb_problem_m
+                elif test_t == 'yn':
+                    problem_j, problem_m = yn_problem_j, yn_problem_m
+                elif test_t == 'swv':
+                    problem_j, problem_m = swv_problem_j, swv_problem_m
+                elif test_t == 'la':
+                    problem_j, problem_m = la_problem_j, la_problem_m
+                elif test_t == 'ft':
+                    problem_j, problem_m = ft_problem_j, ft_problem_m
                 else:
-                    # ortools solver
-                    from pathlib import Path
-                    ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
-                    if ortools_path.is_file():
+                    raise Exception(
+                        'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn"].')
+
+                mean_gap_each_bench = []
+
+                for p_j, p_m in zip(problem_j, problem_m):  # select problem size
+
+                    inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+
+                    print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
+
+                    # read saved gap_against or use ortools to solve it.
+                    if test_t != 'syn':
                         gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     else:
-                        ortools_results = []
-                        print('Starting Ortools...')
-                        for i, data in enumerate(inst):
-                            times_rearrange = np.expand_dims(data[0], axis=-1)
-                            machines_rearrange = np.expand_dims(data[1], axis=-1)
-                            data = np.concatenate((machines_rearrange, times_rearrange), axis=-1)
-                            result = MinimalJobshopSat(data.tolist())
-                            print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
-                            ortools_results.append(result)
-                        ortools_results = np.array(ortools_results)
-                        np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
-                        gap_against = ortools_results[:, 1]
+                        # ortools solver
+                        from pathlib import Path
+                        ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                        if ortools_path.is_file():
+                            gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                        else:
+                            ortools_results = []
+                            print('Starting Ortools...')
+                            for i, data in enumerate(inst):
+                                times_rearrange = np.expand_dims(data[0], axis=-1)
+                                machines_rearrange = np.expand_dims(data[1], axis=-1)
+                                data = np.concatenate((machines_rearrange, times_rearrange), axis=-1)
+                                result = MinimalJobshopSat(data.tolist())
+                                print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
+                                ortools_results.append(result)
+                            ortools_results = np.array(ortools_results)
+                            np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
+                            gap_against = ortools_results[:, 1]
 
-                env = Env()
-                policy = Actor(
-                    in_channels_fwd=args.in_channels_fwd,
-                    in_channels_bwd=args.in_channels_bwd,
-                    hidden_channels=args.hidden_channels,
-                    out_channels=args.out_channels,
-                    heads=args.heads,
-                    dropout_for_gat=args.dropout_for_gat
-                ).to(dev).eval()
+                    env = Env()
+                    policy = Actor(
+                        in_channels_fwd=args.in_channels_fwd,
+                        in_channels_bwd=args.in_channels_bwd,
+                        hidden_channels=args.hidden_channels,
+                        out_channels=args.out_channels,
+                        heads=args.heads,
+                        dropout_for_gat=args.dropout_for_gat
+                    ).to(dev).eval()
 
-                saved_model_path = './saved_model/incumbent_model_' + algo_config + '.pth'
-                print('loading model from:', saved_model_path)
-                policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
-
-                torch.manual_seed(seed)
-                torch.cuda.manual_seed_all(seed)
-                print('Starting rollout DRL policy...')
-                # t3 = time.time()
-                result, computation_time = [], []
-                G, (action_set, optimal_mark, paths) = env.reset(
-                    instances=inst,
-                    init_sol_type=init,
-                    tabu_size=args.tabu_size,
-                    device=dev,
-                    mask_previous_action=args.mask_previous_action == 'True',
-                    longest_path_finder=args.path_finder)
-                # t4 = time.time()
-
-                mean_gap_each_size = []
-
-                drl_start = time.time()
-                while env.itr < cap_horizon:
-                    # t1 = time.time()
-                    sampled_a, log_p, ent = policy(
-                        pyg_sol=G,
-                        feasible_action=action_set,
-                        optimal_mark=optimal_mark,
-                        critical_path=paths
+                    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
+                        # env parameters
+                        args.tabu_size,
+                        # model parameters
+                        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
+                        # training parameters
+                        model_j, model_m, args.lr, args.steps_learn, args.transit, args.batch_size,
+                        args.total_instances, args.step_validation, args.ent_coeff
                     )
 
-                    G, reward, (action_set, optimal_mark, paths) = env.step(
-                        action=sampled_a,
-                        prt=False,
-                        show_action_space_compute_time=False
-                    )
+                    saved_model_path = './saved_model/incumbent_model_' + algo_config + '.pth'
+                    print('loading model from:', saved_model_path)
+                    policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 
-                    # t2 = time.time()
-                    for log_horizon in performance_milestones:
-                        if env.itr == log_horizon:
-                            csv_index.append('{} {}x{} {}'.format(test_t, p_j, p_m, log_horizon))
-                            if result_type == 'incumbent':
-                                DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
-                            else:
-                                DRL_result = env.current_objs.cpu().squeeze().numpy()
-                            result.append(DRL_result)
-                            computation_time.append(time.time() - drl_start)
-                            print('For testing steps: {}    '.format(
-                                env.itr if env.itr > 500 else ' ' + str(env.itr)),
-                                  'Optimal Gap: {:.6f}    '.format(
-                                      ((DRL_result - gap_against) / gap_against).mean()),
-                                  'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
-                            mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
-                mean_gap_each_bench.append(np.array(mean_gap_each_size).reshape(-1, 1))
-            mean_gap_all.append(np.concatenate(mean_gap_each_bench, axis=0))
-            mean_gap_all.append(np.array([[-1]], dtype=float))
-            csv_index.append('dummy')
-        mean_gap_all = np.concatenate(mean_gap_all, axis=0)
-        print(mean_gap_all)
-        dataFrame = pd.DataFrame(mean_gap_all, index=csv_index, columns=['{}x{}'.format(args.j, args.m)])
-        with pd.ExcelWriter('./excel/mean_gap_all_{}x{}.xlsx'.format(args.j, args.m)) as writer:  # writing to excel
+                    torch.manual_seed(seed)
+                    torch.cuda.manual_seed_all(seed)
+                    print('Starting rollout DRL policy...')
+                    # t3 = time.time()
+                    result, computation_time = [], []
+                    G, (action_set, optimal_mark, paths) = env.reset(
+                        instances=inst,
+                        init_sol_type=init,
+                        tabu_size=args.tabu_size,
+                        device=dev,
+                        mask_previous_action=args.mask_previous_action == 'True',
+                        longest_path_finder=args.path_finder)
+                    # t4 = time.time()
+
+                    mean_gap_each_size = []
+
+                    drl_start = time.time()
+                    while env.itr < cap_horizon:
+                        # t1 = time.time()
+                        sampled_a, log_p, ent = policy(
+                            pyg_sol=G,
+                            feasible_action=action_set,
+                            optimal_mark=optimal_mark,
+                            critical_path=paths
+                        )
+
+                        G, reward, (action_set, optimal_mark, paths) = env.step(
+                            action=sampled_a,
+                            prt=False,
+                            show_action_space_compute_time=False
+                        )
+
+                        # t2 = time.time()
+                        for log_horizon in performance_milestones:
+                            if env.itr == log_horizon:
+                                csv_index.append('{} {}x{} {}'.format(test_t, p_j, p_m, log_horizon))
+                                if result_type == 'incumbent':
+                                    DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
+                                else:
+                                    DRL_result = env.current_objs.cpu().squeeze().numpy()
+                                result.append(DRL_result)
+                                computation_time.append(time.time() - drl_start)
+                                print('For testing steps: {}    '.format(
+                                    env.itr if env.itr > 500 else ' ' + str(env.itr)),
+                                      'Optimal Gap: {:.6f}    '.format(
+                                          ((DRL_result - gap_against) / gap_against).mean()),
+                                      'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
+                                mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
+                    mean_gap_each_bench.append(np.array(mean_gap_each_size).reshape(-1, 1))
+                mean_gap_all_benchmark.append(np.concatenate(mean_gap_each_bench, axis=0))
+                mean_gap_all_benchmark.append(np.array([[-1]], dtype=float))
+                csv_index.append('dummy')
+            mean_gap_all_benchmark = np.concatenate(mean_gap_all_benchmark, axis=0)
+            mean_gap_all_model_all_benchmark.append(mean_gap_all_benchmark)
+        mean_gap_all_model_all_benchmark = np.concatenate(mean_gap_all_model_all_benchmark, axis=1)
+        dataFrame = pd.DataFrame(
+            mean_gap_all_model_all_benchmark,
+            index=csv_index[:mean_gap_all_model_all_benchmark.shape[0]],
+            columns=['{}x{}'.format(model_j, model_m) for [model_j, model_m] in model_size])
+        with pd.ExcelWriter('./excel/mean_gap_all_model_all_benchmark.xlsx') as writer:  # writing to excel
             dataFrame.to_excel(writer, sheet_name='page1', float_format='%.8f')  # page 1
 
 
