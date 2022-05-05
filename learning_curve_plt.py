@@ -10,8 +10,8 @@ out_channels = 128
 heads = 4
 dropout_for_gat = 0
 # training parameters
-j = 10
-m = 10
+j = 50
+m = 20
 lr = 1e-5
 steps_learn = 10
 transit = 500
@@ -53,7 +53,7 @@ if log_type == 'training':
     plt.ylabel('Training', {'size': y_label_scale})
     plt.grid()
     x = np.array([i + 1 for i in range(obj1.shape[0])])
-    plt.plot(x, obj1, color='tab:blue', label='{}×{}'.format(10, 10))
+    plt.plot(x, obj1, color='tab:blue', label='{}×{}'.format(j, m))
     plt.tight_layout()
     plt.legend(fontsize=anchor_text_size)
     if save:
@@ -72,7 +72,7 @@ else:
     plt.ylabel('Incumbent', {'size': y_label_scale})
     plt.grid()
     x1 = np.array([i + 1 for i in range(obj_incumbent1.shape[0])])
-    plt.plot(x1, obj_incumbent1, color='tab:blue', label='{}×{}'.format(10, 10))
+    plt.plot(x1, obj_incumbent1, color='tab:blue', label='{}×{}'.format(j, m))
     plt.tight_layout()
     plt.legend(fontsize=anchor_text_size)
     if save:
@@ -88,7 +88,7 @@ else:
     plt.ylabel('Last-Step', {'size': y_label_scale})
     plt.grid()
     x1 = np.array([i + 1 for i in range(obj_incumbent1.shape[0])])
-    plt.plot(x1, obj_last_step1, color='tab:blue', label='{}×{}'.format(10, 10))
+    plt.plot(x1, obj_last_step1, color='tab:blue', label='{}×{}'.format(j, m))
     plt.tight_layout()
     plt.legend(fontsize=anchor_text_size)
     if save:
