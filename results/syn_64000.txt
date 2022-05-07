@@ -1,0 +1,54 @@
+using cuda to test...
+Testing syn of size [10, 10].
+
+Start testing syn10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.032977     Average Time: 0.4600
+For testing steps: 1000     Optimal Gap: 0.025485     Average Time: 0.9135
+For testing steps: 2000     Optimal Gap: 0.020856     Average Time: 1.8160
+For testing steps: 5000     Optimal Gap: 0.014375     Average Time: 4.5118
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --j=15 --m=10 --total_instances=64000 --t_j=15 --t_m=10 --test_synthetic=True
+using cuda to test...
+Testing syn of size [15, 10].
+
+Start testing syn15x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.053620     Average Time: 0.5066
+For testing steps: 1000     Optimal Gap: 0.044092     Average Time: 1.0080
+For testing steps: 2000     Optimal Gap: 0.035797     Average Time: 2.0025
+For testing steps: 5000     Optimal Gap: 0.029900     Average Time: 4.9826
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --j=15 --m=15 --total_instances=64000 --t_j=15 --t_m=15 --test_synthetic=True
+using cuda to test...
+Testing syn of size [15, 15].
+
+Start testing syn15x15...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x15-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.072723     Average Time: 0.5694
+For testing steps: 1000     Optimal Gap: 0.061947     Average Time: 1.1311
+For testing steps: 2000     Optimal Gap: 0.053409     Average Time: 2.2600
+For testing steps: 5000     Optimal Gap: 0.045934     Average Time: 5.6389
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --j=20 --m=10 --total_instances=64000 --t_j=20 --t_m=10 --test_synthetic=True
+using cuda to test...
+Testing syn of size [20, 10].
+
+Start testing syn20x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.031809     Average Time: 0.5504
+For testing steps: 1000     Optimal Gap: 0.025551     Average Time: 1.0898
+For testing steps: 2000     Optimal Gap: 0.019333     Average Time: 2.1668
+For testing steps: 5000     Optimal Gap: 0.014624     Average Time: 5.3690
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --j=20 --m=15 --total_instances=64000 --t_j=20 --t_m=15 --test_synthetic=True
+using cuda to test...
+Testing syn of size [20, 15].
+
+Start testing syn20x15...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x15-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.090179     Average Time: 0.6123
+For testing steps: 1000     Optimal Gap: 0.076840     Average Time: 1.2164
+For testing steps: 2000     Optimal Gap: 0.066511     Average Time: 2.4202
+For testing steps: 5000     Optimal Gap: 0.057013     Average Time: 6.0120
