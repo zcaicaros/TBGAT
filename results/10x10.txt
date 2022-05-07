@@ -29,3 +29,38 @@ For testing steps:  500     Optimal Gap: 0.059257     Average Time: 1.8924
 For testing steps: 1000     Optimal Gap: 0.055336     Average Time: 3.7275
 For testing steps: 2000     Optimal Gap: 0.053864     Average Time: 7.3945
 For testing steps: 5000     Optimal Gap: 0.039738     Average Time: 18.3687
+
+
+
+
+Start testing abz10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.029032     Average Time: 6.6104
+For testing steps: 1000     Optimal Gap: 0.029032     Average Time: 13.0519
+For testing steps: 2000     Optimal Gap: 0.029032     Average Time: 25.8743
+For testing steps: 5000     Optimal Gap: 0.009009     Average Time: 64.3185
+
+Start testing ft10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.077419     Average Time: 14.6923
+For testing steps: 1000     Optimal Gap: 0.077419     Average Time: 28.7723
+For testing steps: 2000     Optimal Gap: 0.077419     Average Time: 56.9781
+For testing steps: 5000     Optimal Gap: 0.077419     Average Time: 141.6331
+
+Start testing la10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.026210     Average Time: 3.1190
+For testing steps: 1000     Optimal Gap: 0.024081     Average Time: 6.1588
+For testing steps: 2000     Optimal Gap: 0.020090     Average Time: 12.1617
+For testing steps: 5000     Optimal Gap: 0.014850     Average Time: 29.9810
+
+Start testing orb10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.058997     Average Time: 1.9142
+For testing steps: 1000     Optimal Gap: 0.050242     Average Time: 3.7479
+For testing steps: 2000     Optimal Gap: 0.040114     Average Time: 7.4486
+For testing steps: 5000     Optimal Gap: 0.039718     Average Time: 18.6091
