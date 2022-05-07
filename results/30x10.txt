@@ -5,3 +5,15 @@ For testing steps:  500     Optimal Gap: 0.000000     Average Time: 4.7055
 For testing steps: 1000     Optimal Gap: 0.000000     Average Time: 8.0578
 For testing steps: 2000     Optimal Gap: 0.000000     Average Time: 14.7040
 For testing steps: 5000     Optimal Gap: 0.000000     Average Time: 34.6335
+
+
+
+
+Start testing la30x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_30x10-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.000000     Average Time: 4.3829
+For testing steps: 1000     Optimal Gap: 0.000000     Average Time: 7.6351
+For testing steps: 2000     Optimal Gap: 0.000000     Average Time: 14.1056
+For testing steps: 5000     Optimal Gap: 0.000000     Average Time: 33.5780
+

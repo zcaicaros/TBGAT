@@ -13,3 +13,23 @@ For testing steps:  500     Optimal Gap: 0.000000     Average Time: 2.7913
 For testing steps: 1000     Optimal Gap: 0.000000     Average Time: 5.2657
 For testing steps: 2000     Optimal Gap: 0.000000     Average Time: 10.2329
 For testing steps: 5000     Optimal Gap: 0.000000     Average Time: 25.0564
+
+
+
+
+Start testing ft20x5...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x5-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.074678     Average Time: 18.0322
+For testing steps: 1000     Optimal Gap: 0.040343     Average Time: 34.7987
+For testing steps: 2000     Optimal Gap: 0.022318     Average Time: 68.1408
+For testing steps: 5000     Optimal Gap: 0.017167     Average Time: 168.1728
+
+Start testing la20x5...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_20x5-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.000000     Average Time: 2.7593
+For testing steps: 1000     Optimal Gap: 0.000000     Average Time: 5.1832
+For testing steps: 2000     Optimal Gap: 0.000000     Average Time: 10.0340
+For testing steps: 5000     Optimal Gap: 0.000000     Average Time: 24.5897
+

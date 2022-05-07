@@ -350,7 +350,7 @@ def main():
             index=csv_index[:mean_gap_all_model_all_benchmark.shape[0]],
             columns=['{}x{}'.format(model_j, model_m) for [model_j, model_m] in model_size])
         with pd.ExcelWriter('./excel/mean_gap_all_model_all_benchmark.xlsx') as writer:  # writing to excel
-            dataFrame.to_excel(writer, sheet_name='page1', float_format='%.8f')  # page 1
+            dataFrame.to_excel(writer, sheet_name=str(args.total_instances), float_format='%.8f')  # page 1
 
 
 if __name__ == '__main__':

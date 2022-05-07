@@ -13,3 +13,23 @@ For testing steps:  500     Optimal Gap: 0.063511     Average Time: 4.1569
 For testing steps: 1000     Optimal Gap: 0.063009     Average Time: 8.2219
 For testing steps: 2000     Optimal Gap: 0.055041     Average Time: 16.3864
 For testing steps: 5000     Optimal Gap: 0.034702     Average Time: 40.4561
+
+
+
+
+Start testing tai15x15...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x15-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.077169     Average Time: 2.3562
+For testing steps: 1000     Optimal Gap: 0.066767     Average Time: 9.4390
+For testing steps: 2000     Optimal Gap: 0.057743     Average Time: 13.8633
+For testing steps: 5000     Optimal Gap: 0.046000     Average Time: 27.0372
+
+Start testing la15x15...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x15-1e-05-10-500-64-64000-10-1e-05.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.084196     Average Time: 4.2354
+For testing steps: 1000     Optimal Gap: 0.063016     Average Time: 8.3416
+For testing steps: 2000     Optimal Gap: 0.055887     Average Time: 16.5536
+For testing steps: 5000     Optimal Gap: 0.033699     Average Time: 40.4675
+
