@@ -11,6 +11,7 @@ from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GATConv, global_mean_pool
 from torch_geometric.utils import add_self_loops
 from torch.nn.utils.rnn import pad_sequence
+from parameters import args
 
 
 class Embed(torch.nn.Module):
@@ -126,7 +127,9 @@ class Actor(torch.nn.Module):
 
         # policy
         self.policy = Sequential(
-            Linear(out_channels * 8 + 1, out_channels * 2),  # 1 for tabu label
+            Linear(out_channels * 8 + 1, out_channels * 2)
+            if args.embed_tabu_label else
+            Linear(out_channels * 8, out_channels * 2),
             # torch.nn.BatchNorm1d(out_channels * 2),
             torch.nn.Tanh(),
             Linear(out_channels * 2, out_channels * 2),
@@ -176,15 +179,21 @@ class Actor(torch.nn.Module):
             action_merged_with_tabu_label = torch.cat(action_list_merged, dim=0)
             actions_merged = action_merged_with_tabu_label[:, :2]
             tabu_label = action_merged_with_tabu_label[:, [2]]
-            action_h_with_tabu_label = torch.cat(
-                [node_h[actions_merged[:, 0]],
-                 node_h[actions_merged[:, 1]],
-                 tabu_label], dim=-1
+            action_h = torch.cat(
+                [
+                    node_h[actions_merged[:, 0]],
+                    node_h[actions_merged[:, 1]],
+                    tabu_label
+                ],
+                dim=-1
             )
+
+            if not args.embed_tabu_label:
+                action_h = action_h[:, :-1]
 
             # compute action score
             action_count = [actions[0].shape[0] for actions in feasible_action if actions]  # if no action then ignore
-            action_score = self.policy(action_h_with_tabu_label)
+            action_score = self.policy(action_h)
             _max_count = max(action_count)
             actions_score_split = list(torch.split(action_score, split_size_or_sections=action_count))
             padded_score = pad_sequence(actions_score_split, padding_value=-torch.inf).transpose(0, -1).transpose(0, 1)

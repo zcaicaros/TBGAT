@@ -26,14 +26,14 @@ def main():
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
     # which model to load
-    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
+    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
         # env parameters
         args.tabu_size,
         # model parameters
         args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
         # training parameters
         args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size,
-        args.total_instances, args.step_validation, args.ent_coeff
+        args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label
     )
 
     # testing specific size
@@ -192,6 +192,18 @@ def main():
         mean_gap_all_model_all_benchmark = []
         csv_index = []
 
+        env_model_config = '{}_{}-{}-{}-{}'.format(
+            # env parameters
+            args.tabu_size,
+            # model parameters
+            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat)
+
+        training_config = '{}-{}-{}-{}-{}-{}-{}-{}'.format(
+            # training parameters
+            args.lr, args.steps_learn, args.transit, args.batch_size,
+            args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label
+        )
+
         for [model_j, model_m] in model_size:
 
             testing_type = ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
@@ -276,15 +288,9 @@ def main():
                         dropout_for_gat=args.dropout_for_gat
                     ).to(dev).eval()
 
-                    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
-                        # env parameters
-                        args.tabu_size,
-                        # model parameters
-                        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
-                        # training parameters
-                        model_j, model_m, args.lr, args.steps_learn, args.transit, args.batch_size,
-                        args.total_instances, args.step_validation, args.ent_coeff
-                    )
+                    model_size_config = '{}x{}'.format(model_j, model_m)
+
+                    algo_config = env_model_config + '_' + model_size_config + '-' + training_config
 
                     saved_model_path = './saved_model/incumbent_model_' + algo_config + '.pth'
                     print('loading model from:', saved_model_path)
@@ -349,8 +355,13 @@ def main():
             mean_gap_all_model_all_benchmark,
             index=csv_index[:mean_gap_all_model_all_benchmark.shape[0]],
             columns=['{}x{}'.format(model_j, model_m) for [model_j, model_m] in model_size])
-        with pd.ExcelWriter('./excel/mean_gap_all_model_all_benchmark.xlsx') as writer:  # writing to excel
-            dataFrame.to_excel(writer, sheet_name=str(args.total_instances), float_format='%.8f')  # page 1
+        # writing to excel
+        with pd.ExcelWriter('excel/{}.xlsx'.format(env_model_config + '_' + training_config)) as writer:
+            dataFrame.to_excel(
+                writer,
+                sheet_name='page1',  # sheet name
+                float_format='%.8f'
+            )
 
 
 if __name__ == '__main__':

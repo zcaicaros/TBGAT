@@ -19,14 +19,14 @@ class NeuralTabu:
         self.env_training = Env()
         self.env_validation = Env()
         self.eps = np.finfo(np.float32).eps.item()
-        self.algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        self.algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # env parameters
             args.tabu_size,
             # model parameters
             args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
             # training parameters
             args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
-            args.step_validation, args.ent_coeff
+            args.step_validation, args.ent_coeff, args.embed_tabu_label
         )
 
         # load or generate validation dataset

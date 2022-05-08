@@ -19,14 +19,15 @@ batch_size = 64
 total_instances = 32000
 step_validation = 10
 ent_coeff = 1e-5
+embed_tabu_label = True
 
-algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}'.format(
+algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
     # env parameters
     tabu_size,
     # model parameters
     hidden_channels, out_channels, heads, dropout_for_gat,
     # training parameters
-    j, m, lr, steps_learn, transit, batch_size, total_instances, step_validation, ent_coeff
+    j, m, lr, steps_learn, transit, batch_size, total_instances, step_validation, ent_coeff, embed_tabu_label
 )
 
 # plot parameters

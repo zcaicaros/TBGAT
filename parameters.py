@@ -29,6 +29,7 @@ parser.add_argument('--step_validation', type=int, default=10)
 parser.add_argument('--ent_coeff', type=float, default=1e-5)
 parser.add_argument('--validation_inst_number', type=int, default=100)
 parser.add_argument('--training_seed', type=int, default=6)
+parser.add_argument('--embed_tabu_label', type=str, default='True', choices=('True', 'False'))
 # testing parameters
 parser.add_argument('--test_specific_size', type=str, default='True', choices=('True', 'False'))
 parser.add_argument('--test_synthetic', type=str, default='False', choices=('True', 'False'))
