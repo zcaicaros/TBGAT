@@ -46,6 +46,7 @@ class TSN5:
             for log_horizon in self.search_horizons:
                 if self.env_rollout.itr == log_horizon:
                     tabu_result = self.env_rollout.incumbent_objs.cpu().squeeze().numpy()
+                    print(tabu_result)
                     print('For testing steps: {}    '.format(self.env_rollout.itr if self.env_rollout.itr > 500 else ' ' + str(self.env_rollout.itr)),
                           'Optimal Gap: {:.6f}    '.format(((tabu_result - gap_against) / gap_against).mean()))
 
@@ -181,15 +182,15 @@ if __name__ == '__main__':
     np.seterr(invalid='ignore')
 
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print('using to {} test TSN5...'.format(dev))
+    print('using {} to test TSN5...'.format(dev))
 
     # solver config
     taboo_size = 5
     performance_milestones = [10 * i for i in range(1, 501)]  # [500, 1000, 2000, 5000]
 
-    if args.test_specific_size:
+    if args.test_specific_size == 'True':
         test_instance_size = [p_j, p_m] = [args.t_j, args.t_m]
-        if not args.test_synthetic:
+        if args.test_synthetic == 'False':
             print('Testing all open benchmark of size {}.'.format(test_instance_size))
             if test_instance_size == [6, 6]:
                 testing_type = ['ft']
@@ -306,13 +307,13 @@ if __name__ == '__main__':
 
             for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-                inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+                # inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
-                # from env.generateJSP import uni_instance_gen
-                # j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
-                # inst = [np.concatenate(
-                #     [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
-                # ) for _ in range(batch_size)]
+                from env.generateJSP import uni_instance_gen
+                j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
+                inst = [np.concatenate(
+                    [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
+                ) for _ in range(batch_size)]
 
                 print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 

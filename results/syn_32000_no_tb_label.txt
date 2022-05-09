@@ -1,0 +1,23 @@
+Start testing syn10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-32000-10-1e-05-False.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.030625     Average Time: 0.4568
+For testing steps: 1000     Optimal Gap: 0.024795     Average Time: 0.9078
+For testing steps: 2000     Optimal Gap: 0.020903     Average Time: 1.8026
+For testing steps: 5000     Optimal Gap: 0.014980     Average Time: 4.5004
+
+Start testing syn15x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x10-1e-05-10-500-64-32000-10-1e-05-False.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.053028     Average Time: 0.5166
+For testing steps: 1000     Optimal Gap: 0.042248     Average Time: 1.0253
+For testing steps: 2000     Optimal Gap: 0.037667     Average Time: 2.0336
+For testing steps: 5000     Optimal Gap: 0.030569     Average Time: 5.0697
+
+Start testing syn15x15...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_15x15-1e-05-10-500-64-32000-10-1e-05-False.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.069233     Average Time: 0.5705
+For testing steps: 1000     Optimal Gap: 0.060567     Average Time: 1.1305
+For testing steps: 2000     Optimal Gap: 0.052376     Average Time: 2.2470
+For testing steps: 5000     Optimal Gap: 0.043265     Average Time: 5.5962

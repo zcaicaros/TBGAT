@@ -171,7 +171,8 @@ class NeuralTabu:
               "transit={}, "
               "batch_size={}, "
               "total_instances={}, "
-              "step_validation={}.".format(args.j,
+              "step_validation={}, "
+              "embed_tabu_label={}".format(args.j,
                                            args.m,
                                            args.lr,
                                            args.ent_coeff,
@@ -184,8 +185,8 @@ class NeuralTabu:
                                            args.transit,
                                            args.batch_size,
                                            args.total_instances,
-                                           args.step_validation
-                                           )
+                                           args.step_validation,
+                                           args.embed_tabu_label)
               )
         print()
 
