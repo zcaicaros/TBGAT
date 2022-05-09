@@ -1,0 +1,7 @@
+Start testing syn10x10...
+loading model from: ./saved_model/incumbent_model_20_128-128-4-0_10x10-1e-05-10-500-64-64000-10-1e-05-False.pth
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.029310     Average Time: 0.4623
+For testing steps: 1000     Optimal Gap: 0.024970     Average Time: 0.9211
+For testing steps: 2000     Optimal Gap: 0.019355     Average Time: 1.8351
+For testing steps: 5000     Optimal Gap: 0.014701     Average Time: 4.5765
