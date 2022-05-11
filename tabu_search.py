@@ -7,6 +7,8 @@ from parameters import args
 import numpy as np
 import random
 import torch
+import time
+import pandas as pd
 
 
 class TSN5:
@@ -26,6 +28,8 @@ class TSN5:
 
     def solve(self):
 
+        np.seterr(invalid='ignore')
+
         # reset rollout env with testing instances
         G, (action_set, _, _) = self.env_rollout.reset(
             instances=self.instances,
@@ -35,6 +39,8 @@ class TSN5:
             mask_previous_action=args.mask_previous_action == 'True',
             longest_path_finder='pytorch')
 
+        gap_log = []
+        time_start = time.time()
         while self.env_rollout.itr < max(self.search_horizons):
             selected_action = self.calculate_move(G, self.env_rollout.current_objs, action_set)
             G, _, (action_set, _, _) = self.env_rollout.step(
@@ -46,9 +52,12 @@ class TSN5:
             for log_horizon in self.search_horizons:
                 if self.env_rollout.itr == log_horizon:
                     tabu_result = self.env_rollout.incumbent_objs.cpu().squeeze().numpy()
-                    print(tabu_result)
+                    gap_log.append([((tabu_result - gap_against) / gap_against).mean()])
                     print('For testing steps: {}    '.format(self.env_rollout.itr if self.env_rollout.itr > 500 else ' ' + str(self.env_rollout.itr)),
-                          'Optimal Gap: {:.6f}    '.format(((tabu_result - gap_against) / gap_against).mean()))
+                          'Optimal Gap: {:.6f}    '.format(((tabu_result - gap_against) / gap_against).mean()),
+                          'Average Time: {:.4f}    '.format((time.time() - time_start) / self.instances.shape[0]))
+
+        return np.array(gap_log)
 
     def calculate_move(self, current_sol, current_cmax, current_action_set):
 
@@ -157,19 +166,19 @@ class TSN5:
 
             aspiration_flag = torch.lt(Cmax_after, Cmax_before).long()
             if (~tb_label).sum() == 0 and aspiration_flag.sum() == 0:  # random select
-                selected_actions.append(random.choice([*action]))
+                selected_a = random.choice([*action])
+                selected_actions.append(selected_a)
             elif (~tb_label).sum() != 0:
                 Cmax_after_non_tabu = Cmax_after[~tb_label]
                 action_index = Cmax_after_non_tabu.argmin(dim=0)
-                selected_actions.append(action[action_index])
+                selected_a = action[~tb_label, :][action_index]
+                selected_actions.append(selected_a)
             else:
                 action_index = random.choice([*torch.where(aspiration_flag == 1)[0]])
-                selected_actions.append(action[action_index])
+                selected_a = action[action_index]
+                selected_actions.append(selected_a)
 
         selected_actions = torch.stack(selected_actions)
-
-        # selected_action = torch.cat([actions[0][[0], :2] for actions in current_action_set if actions], dim=0)
-        # print(selected_action)
 
         return selected_actions
 
@@ -179,14 +188,17 @@ if __name__ == '__main__':
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
-    np.seterr(invalid='ignore')
 
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using {} to test TSN5...'.format(dev))
 
+    dynamic_tb_size = True
+    fixed_tb_size = 20
+
+    print("dynamic tabu list size." if dynamic_tb_size else "tabu size = {}".format(fixed_tb_size))
+
     # solver config
-    taboo_size = 5
-    performance_milestones = [10 * i for i in range(1, 501)]  # [500, 1000, 2000, 5000]
+    performance_milestones = [500, 1000, 2000, 5000]  # [500, 1000, 2000, 5000], [10 * i for i in range(1, 501)]
 
     if args.test_specific_size == 'True':
         test_instance_size = [p_j, p_m] = [args.t_j, args.t_m]
@@ -258,6 +270,19 @@ if __name__ == '__main__':
                     np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                     gap_against = ortools_results[:, 1]
 
+            if dynamic_tb_size:
+                # dynamic tabu size
+                L = 10 + p_j / p_m
+                L_min = round(L)
+                if p_j <= 2 * p_m:
+                    L_max = round(1.4 * L)
+                else:
+                    L_max = round(1.5 * L)
+                taboo_size = random.randint(L_min, L_max)
+            else:
+                # fixed tabu size
+                taboo_size = fixed_tb_size
+
             # start to test
             solver = TSN5(instances=inst, search_horizons=performance_milestones, tabu_size=taboo_size, device=dev)
             solver.solve()
@@ -266,7 +291,7 @@ if __name__ == '__main__':
     else:
         # benchmark config
         init_type = ['fdd-divide-wkr']  # ['fdd-divide-wkr', 'spt']
-        testing_type = ['ft']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+        testing_type = ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
         syn_problem_j = [10]  # [10, 15, 15, 20, 20, 100, 150]
         syn_problem_m = [10]  # [10, 10, 15, 10, 15, 20, 25]
         tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]
@@ -284,6 +309,8 @@ if __name__ == '__main__':
         ft_problem_j = [6, 10, 20]  # [6, 10, 20]
         ft_problem_m = [6, 10, 5]  # [6, 10, 5]
 
+        gap_each_dataset = []
+        csv_index = []
         for test_t in testing_type:  # select benchmark
             if test_t == 'syn':
                 problem_j, problem_m = syn_problem_j, syn_problem_m
@@ -307,13 +334,7 @@ if __name__ == '__main__':
 
             for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-                # inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
-
-                from env.generateJSP import uni_instance_gen
-                j, m, l, h, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 1, 99, 3
-                inst = [np.concatenate(
-                    [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
-                ) for _ in range(batch_size)]
+                inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
                 print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
@@ -341,6 +362,36 @@ if __name__ == '__main__':
                         np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                         gap_against = ortools_results[:, 1]
 
+                if dynamic_tb_size:
+                    # dynamic tabu size
+                    L = 10 + p_j / p_m
+                    L_min = round(L)
+                    if p_j <= 2 * p_m:
+                        L_max = round(1.4 * L)
+                    else:
+                        L_max = round(1.5 * L)
+                    taboo_size = random.randint(L_min, L_max)
+                else:
+                    # fixed tabu size
+                    taboo_size = fixed_tb_size
+
                 # start to test
                 solver = TSN5(instances=inst, search_horizons=performance_milestones, tabu_size=taboo_size, device=dev)
-                solver.solve()
+                csv_index += ['{} {}x{} {}'.format(test_t, p_j, p_m, log_h) for log_h in performance_milestones]
+                gap = solver.solve()
+                gap_each_dataset.append(gap)
+            gap_each_dataset.append(np.array([[-1]], dtype=float))
+            csv_index.append('dummy')
+        gap_each_dataset = np.concatenate(gap_each_dataset, axis=0)
+
+        dataFrame = pd.DataFrame(
+            gap_each_dataset,
+            index=csv_index,
+            columns=['TSN5'])
+        # writing to excel
+        with pd.ExcelWriter('excel/TSN5_result.xlsx') as writer:
+            dataFrame.to_excel(
+                writer,
+                sheet_name='page1',  # sheet name
+                float_format='%.8f'
+            )
