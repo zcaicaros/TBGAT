@@ -9,6 +9,7 @@ import random
 import torch
 import time
 import pandas as pd
+from model.actor import Actor
 
 
 class TSN5:
@@ -16,8 +17,11 @@ class TSN5:
                  instances,
                  search_horizons,
                  tabu_size,
-                 device):
+                 device,
+                 agent_config,
+                 if_drl=False):
 
+        self.if_drl = if_drl
         self.instances = instances
         self.search_horizons = search_horizons
         self.tabu_size = tabu_size
@@ -26,12 +30,27 @@ class TSN5:
         # rollout env init
         self.env_rollout = Env()
 
+        self.drl_agent = Actor(
+                in_channels_fwd=args.in_channels_fwd,
+                in_channels_bwd=args.in_channels_bwd,
+                hidden_channels=args.hidden_channels,
+                out_channels=args.out_channels,
+                heads=args.heads,
+                dropout_for_gat=args.dropout_for_gat
+            ).to(dev).eval()
+
+        # load network
+        if if_drl:
+            saved_model_path = './saved_model/incumbent_model_' + agent_config + '.pth'
+            print('loading model from:', saved_model_path)
+            self.drl_agent.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
+
     def solve(self):
 
         np.seterr(invalid='ignore')
 
         # reset rollout env with testing instances
-        G, (action_set, _, _) = self.env_rollout.reset(
+        G, (action_set, optimal_mark, _) = self.env_rollout.reset(
             instances=self.instances,
             init_sol_type='fdd-divide-wkr',
             tabu_size=self.tabu_size,
@@ -42,8 +61,8 @@ class TSN5:
         gap_log = []
         time_start = time.time()
         while self.env_rollout.itr < max(self.search_horizons):
-            selected_action = self.calculate_move(G, self.env_rollout.current_objs, action_set)
-            G, _, (action_set, _, _) = self.env_rollout.step(
+            selected_action = self.calculate_move(G, self.env_rollout.current_objs, action_set, optimal_mark)
+            G, _, (action_set, optimal_mark, _) = self.env_rollout.step(
                 action=selected_action,
                 prt=False,
                 show_action_space_compute_time=False
@@ -59,7 +78,11 @@ class TSN5:
 
         return np.array(gap_log)
 
-    def calculate_move(self, current_sol, current_cmax, current_action_set):
+    def calculate_move(self,
+                       current_sol,
+                       current_cmax,
+                       current_action_set,
+                       optimal_mark=None):
 
         # sort edge_index otherwise to_data_list() fn will be messed and bug
         current_sol.edge_index = sort_edge_index(current_sol.edge_index)
@@ -169,13 +192,29 @@ class TSN5:
                 selected_a = random.choice([*action])
                 selected_actions.append(selected_a)
             elif (~tb_label).sum() != 0:
-                Cmax_after_non_tabu = Cmax_after[~tb_label]
-                action_index = Cmax_after_non_tabu.argmin(dim=0)
-                selected_a = action[~tb_label, :][action_index]
+                if self.if_drl:
+                    sampled_a, _, _ = self.drl_agent(
+                        pyg_sol=current_sol,
+                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)]],
+                        optimal_mark=optimal_mark
+                    )
+                    selected_a = sampled_a[0]
+                else:
+                    Cmax_after_non_tabu = Cmax_after[~tb_label]
+                    action_index = Cmax_after_non_tabu.argmin(dim=0)
+                    selected_a = action[~tb_label, :][action_index]
                 selected_actions.append(selected_a)
             else:
-                action_index = random.choice([*torch.where(aspiration_flag == 1)[0]])
-                selected_a = action[action_index]
+                if self.if_drl:
+                    sampled_a, _, _ = self.drl_agent(
+                        pyg_sol=current_sol,
+                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)]],
+                        optimal_mark=optimal_mark
+                    )
+                    selected_a = sampled_a[0]
+                else:
+                    action_index = random.choice([*torch.where(aspiration_flag == 1)[0]])
+                    selected_a = action[action_index]
                 selected_actions.append(selected_a)
 
         selected_actions = torch.stack(selected_actions)
@@ -196,6 +235,16 @@ if __name__ == '__main__':
     fixed_tb_size = 20
 
     print("dynamic tabu list size." if dynamic_tb_size else "tabu size = {}".format(fixed_tb_size))
+
+    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        # env parameters
+        args.tabu_size,
+        # model parameters
+        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
+        # training parameters
+        args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size,
+        args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label
+    )
 
     # solver config
     performance_milestones = [500, 1000, 2000, 5000]  # [500, 1000, 2000, 5000], [10 * i for i in range(1, 501)]
@@ -284,7 +333,14 @@ if __name__ == '__main__':
                 taboo_size = fixed_tb_size
 
             # start to test
-            solver = TSN5(instances=inst, search_horizons=performance_milestones, tabu_size=taboo_size, device=dev)
+            solver = TSN5(
+                instances=inst,
+                search_horizons=performance_milestones,
+                tabu_size=taboo_size,
+                device=dev,
+                agent_config=algo_config,
+                if_drl=True if args.drl_with_tabu == 'True' else False
+            )
             solver.solve()
 
     # testing all benchmark
@@ -376,7 +432,14 @@ if __name__ == '__main__':
                     taboo_size = fixed_tb_size
 
                 # start to test
-                solver = TSN5(instances=inst, search_horizons=performance_milestones, tabu_size=taboo_size, device=dev)
+                solver = TSN5(
+                    instances=inst,
+                    search_horizons=performance_milestones,
+                    tabu_size=taboo_size,
+                    device=dev,
+                    agent_config=algo_config,
+                    if_drl=True if args.drl_with_tabu == 'True' else False
+                )
                 csv_index += ['{} {}x{} {}'.format(test_t, p_j, p_m, log_h) for log_h in performance_milestones]
                 gap = solver.solve()
                 gap_each_dataset.append(gap)
