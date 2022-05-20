@@ -1,0 +1,33 @@
+Start testing syn10x10...
+For testing steps:  500     Optimal Gap: 0.026896     Average Time: 3.5991
+For testing steps: 1000     Optimal Gap: 0.020650     Average Time: 7.1606
+For testing steps: 2000     Optimal Gap: 0.014226     Average Time: 14.2827
+For testing steps: 5000     Optimal Gap: 0.009707     Average Time: 35.5121
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=0 python3 tabu_search.py --test_specific_size=True --drl_with_tabu=False --test_synthetic=True --t_j=15 --t_m=10
+
+Start testing syn15x10...
+For testing steps:  500     Optimal Gap: 0.043359     Average Time: 3.6956
+For testing steps: 1000     Optimal Gap: 0.035803     Average Time: 7.3424
+For testing steps: 2000     Optimal Gap: 0.028969     Average Time: 14.6234
+For testing steps: 5000     Optimal Gap: 0.022077     Average Time: 36.2552
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=0 python3 tabu_search.py --test_specific_size=True --drl_with_tabu=False --test_synthetic=True --t_j=15 --t_m=15
+
+Start testing syn15x15...
+For testing steps:  500     Optimal Gap: 0.056974     Average Time: 4.2919
+For testing steps: 1000     Optimal Gap: 0.047623     Average Time: 8.5386
+For testing steps: 2000     Optimal Gap: 0.037420     Average Time: 17.0491
+For testing steps: 5000     Optimal Gap: 0.030521     Average Time: 42.6163
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=0 python3 tabu_search.py --test_specific_size=True --drl_with_tabu=False --test_synthetic=True --t_j=20 --t_m=10
+
+Start testing syn20x10...
+For testing steps:  500     Optimal Gap: 0.026272     Average Time: 3.6844
+For testing steps: 1000     Optimal Gap: 0.017992     Average Time: 7.1823
+For testing steps: 2000     Optimal Gap: 0.013708     Average Time: 13.9461
+For testing steps: 5000     Optimal Gap: 0.011542     Average Time: 33.8655
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=0 python3 tabu_search.py --test_specific_size=True --drl_with_tabu=False --test_synthetic=True --t_j=20 --t_m=15
+
+Start testing syn20x15...
+For testing steps:  500     Optimal Gap: 0.072736     Average Time: 4.4759
+For testing steps: 1000     Optimal Gap: 0.060559     Average Time: 8.9552
+For testing steps: 2000     Optimal Gap: 0.049681     Average Time: 17.8805
+For testing steps: 5000     Optimal Gap: 0.040253     Average Time: 44.5516

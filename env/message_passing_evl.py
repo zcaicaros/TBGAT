@@ -72,7 +72,7 @@ def MinimalJobshopSat(data):
 
     # Solve model.
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 3600.0
+    solver.parameters.max_time_in_seconds = 1
     status = solver.Solve(model)
 
     # Create one list of assigned tasks per machine.
@@ -287,7 +287,10 @@ def cpm_backward(graph, makespan, topological_order=None):
 
 def cpm_forward_and_backward(G):
     # calculate topological order
+    t1 = time.time()
     topological_order = list(nx.topological_sort(G))
+    print(time.time() - t1)
+    # print(topological_order)
     # forward and backward pass
     earliest_start_time = np.fromiter(cpm_forward(graph=G, topological_order=topological_order).values(), dtype=np.float32)
     latest_start_time = np.fromiter(cpm_backward(graph=G, topological_order=topological_order, makespan=earliest_start_time[-1]).values(), dtype=np.float32)
@@ -295,34 +298,64 @@ def cpm_forward_and_backward(G):
     return earliest_start_time, latest_start_time, earliest_start_time[-1]
 
 
+def topological_sort_grouped(G):
+    t2 = time.time()
+    print('yes')
+    indegree_map = {v: d for v, d in G.in_degree() if d > 0}
+    zero_indegree = [v for v, d in G.in_degree() if d == 0]
+    while zero_indegree:
+        yield zero_indegree
+        new_zero_indegree = []
+        for v in zero_indegree:
+            for _, child in G.edges(v):
+                indegree_map[child] -= 1
+                if not indegree_map[child]:
+                    new_zero_indegree.append(child)
+        new_zero_indegree.sort()
+        zero_indegree = new_zero_indegree
+    print(time.time() - t2)
+
+
 if __name__ == "__main__":
     from generateJSP import uni_instance_gen
 
     ## test against ortools
-    test_against_ortools = True
-    if test_against_ortools:
-        j, m, batch_size = {'low': 3, 'high': 6}, {'low': 3, 'high': 6}, 10
-        l = 1
-        h = 99
-        dev = 'cuda' if torch.cuda.is_available() else 'cpu'
-        np.random.seed(1)
+    j, m, batch_size = {'low': 100, 'high': 101}, {'low': 20, 'high': 21}, 1
+    l = 1
+    h = 99
+    dev = 'cuda' if torch.cuda.is_available() else 'cpu'
+    np.random.seed(1)
 
-        insts = [np.concatenate(
-            [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
-        ) for _ in range(batch_size)]
+    insts = [np.concatenate(
+        [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
+    ) for _ in range(batch_size)]
 
-        ortools_makespan, sol = exact_solver(insts)
+    ortools_makespan, sol = exact_solver(insts)
 
-        pygs = []
-        eva = MassagePassingEval()
-        for i, inst in enumerate(insts):
-            print('Compute Cmax of sol of instance using message-passing:', i+1)
-            edg_idx = processing_order_to_edge_index(order=sol[i], instance=inst)
-            dur = torch.from_numpy(np.pad(inst[0].reshape(-1), (1, 1), 'constant', constant_values=0)).reshape(-1, 1)
-            pygs.append(Data(dur=dur, edge_index=edg_idx, num_nodes=dur.shape[0]))
-        pyg_batch = Batch.from_data_list(pygs).to(dev)
-        est, lst, obj, count, _, _ = eva.eval(pyg_batch)
-        if np.array_equal(obj.squeeze().cpu().numpy(), ortools_makespan):
-            print('message-passing evaluator get the same makespan when it rollouts ortools solution!')
-        else:
-            print('message-passing evaluator get the different makespan when it rollouts ortools solution.')
+    pygs = []
+    eva = MassagePassingEval()
+    for i, inst in enumerate(insts):
+        print('Compute Cmax of sol of instance using message-passing:', i+1)
+        edg_idx = processing_order_to_edge_index(order=sol[i], instance=inst)
+        dur = torch.from_numpy(np.pad(inst[0].reshape(-1), (1, 1), 'constant', constant_values=0)).reshape(-1, 1)
+        pygs.append(Data(dur=dur, edge_index=edg_idx, num_nodes=dur.shape[0]))
+    pyg_batch = Batch.from_data_list(pygs).to(dev)
+    est, lst, obj, count, fwd_batch, bwd_batch = eva.eval(pyg_batch)
+    if np.array_equal(obj.squeeze().cpu().numpy(), ortools_makespan):
+        print('message-passing evaluator get the same makespan when it rollouts ortools solution!')
+    else:
+        print('message-passing evaluator get the different makespan when it rollouts ortools solution.')
+
+
+    from torch_geometric.utils import to_networkx, sort_edge_index
+    pyg_batch.edge_index = sort_edge_index(pyg_batch.edge_index)
+    pyg_batch.weight = pyg_batch.dur[pyg_batch.edge_index[0]]
+    nxg = to_networkx(pyg_batch, edge_attrs=['weight'])
+    ret = cpm_forward_and_backward(nxg)
+
+    a = topological_sort_grouped(nxg)
+    print(list(topological_sort_grouped(nxg)))
+    print(torch.cat(fwd_batch).cpu().numpy())
+
+
+

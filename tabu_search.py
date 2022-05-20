@@ -84,6 +84,9 @@ class TSN5:
                        current_action_set,
                        optimal_mark=None):
 
+        if not [a[0] for a in current_action_set if a]:
+            return None
+
         # sort edge_index otherwise to_data_list() fn will be messed and bug
         current_sol.edge_index = sort_edge_index(current_sol.edge_index)
         # sort edge_index_disjunctions otherwise to_data_list() fn will be messed and bug
@@ -195,7 +198,7 @@ class TSN5:
                 if self.if_drl:
                     sampled_a, _, _ = self.drl_agent(
                         pyg_sol=current_sol,
-                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)]],
+                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)[~tb_label, :]]],
                         optimal_mark=optimal_mark
                     )
                     selected_a = sampled_a[0]
@@ -208,7 +211,7 @@ class TSN5:
                 if self.if_drl:
                     sampled_a, _, _ = self.drl_agent(
                         pyg_sol=current_sol,
-                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)]],
+                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)[torch.where(aspiration_flag == 1)[0], :]]],
                         optimal_mark=optimal_mark
                     )
                     selected_a = sampled_a[0]
@@ -266,7 +269,7 @@ if __name__ == '__main__':
             elif test_instance_size == [15, 15]:
                 testing_type = ['tai', 'la']
             elif test_instance_size == [20, 5]:
-                testing_type = ['ft']
+                testing_type = ['la']
             elif test_instance_size == [20, 10]:
                 testing_type = ['la', 'swv']
             elif test_instance_size == [20, 15]:
@@ -276,6 +279,8 @@ if __name__ == '__main__':
             elif test_instance_size == [30, 10]:
                 testing_type = ['la']
             elif test_instance_size == [30, 15]:
+                testing_type = ['tai']
+            elif test_instance_size == [30, 20]:
                 testing_type = ['tai']
             elif test_instance_size == [50, 10]:
                 testing_type = ['swv']

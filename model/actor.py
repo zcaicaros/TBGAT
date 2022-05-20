@@ -208,6 +208,9 @@ class Actor(torch.nn.Module):
             sampled_action = torch.gather(
                 padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
             ).squeeze(dim=1)
+            # print(feasible_action)
+            # print(action_id)
+            # print(sampled_action)
 
             # greedy action
             # action_id = torch.argmax(pi, dim=-1)
@@ -351,8 +354,8 @@ if __name__ == '__main__':
 
     env.cpm_eval()
 
-    # loss = log_p.mean()
-    # grad = torch.autograd.grad(loss, [param for param in net.parameters()])
+    loss = log_p.mean()
+    grad = torch.autograd.grad(loss + torch.tensor(1., requires_grad=True), [param for param in net.parameters()])
 
     log_p_normal = log_p.clone()
     # print(log_p_normal)
