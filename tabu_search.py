@@ -57,6 +57,8 @@ class TSN5:
             device=self.device,
             mask_previous_action=args.mask_previous_action == 'True',
             longest_path_finder='pytorch')
+        # print(self.env_rollout.tabu_size)
+        # print([lst.shape for lst in self.env_rollout.tabu_list])
 
         gap_log = []
         time_start = time.time()
@@ -234,10 +236,9 @@ if __name__ == '__main__':
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using {} to test TSN5...'.format(dev))
 
-    dynamic_tb_size = True
-    fixed_tb_size = 20
+    tb_size = -1
 
-    print("dynamic tabu list size." if dynamic_tb_size else "tabu size = {}".format(fixed_tb_size))
+    print("dynamic tabu list size." if tb_size == -1 else "tabu size = {}".format(tb_size))
 
     algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
         # env parameters
@@ -324,24 +325,11 @@ if __name__ == '__main__':
                     np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                     gap_against = ortools_results[:, 1]
 
-            if dynamic_tb_size:
-                # dynamic tabu size
-                L = 10 + p_j / p_m
-                L_min = round(L)
-                if p_j <= 2 * p_m:
-                    L_max = round(1.4 * L)
-                else:
-                    L_max = round(1.5 * L)
-                taboo_size = random.randint(L_min, L_max)
-            else:
-                # fixed tabu size
-                taboo_size = fixed_tb_size
-
             # start to test
             solver = TSN5(
                 instances=inst,
                 search_horizons=performance_milestones,
-                tabu_size=taboo_size,
+                tabu_size=tb_size,
                 device=dev,
                 agent_config=algo_config,
                 if_drl=True if args.drl_with_tabu == 'True' else False
@@ -423,24 +411,11 @@ if __name__ == '__main__':
                         np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                         gap_against = ortools_results[:, 1]
 
-                if dynamic_tb_size:
-                    # dynamic tabu size
-                    L = 10 + p_j / p_m
-                    L_min = round(L)
-                    if p_j <= 2 * p_m:
-                        L_max = round(1.4 * L)
-                    else:
-                        L_max = round(1.5 * L)
-                    taboo_size = random.randint(L_min, L_max)
-                else:
-                    # fixed tabu size
-                    taboo_size = fixed_tb_size
-
                 # start to test
                 solver = TSN5(
                     instances=inst,
                     search_horizons=performance_milestones,
-                    tabu_size=taboo_size,
+                    tabu_size=tb_size,
                     device=dev,
                     agent_config=algo_config,
                     if_drl=True if args.drl_with_tabu == 'True' else False

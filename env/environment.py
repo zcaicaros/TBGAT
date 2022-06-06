@@ -586,9 +586,22 @@ class Env:
         self.S = (torch.cumsum(self.num_nodes_per_example, dim=0) - self.num_nodes_per_example).cpu().numpy()
         self.T = (torch.cumsum(self.num_nodes_per_example, dim=0) - 1).cpu().numpy()
         self.num_instance = len(instances)
-        self.tabu_size = tabu_size
-        self.tabu_list = [-torch.ones(size=[tabu_size, 2], device=device, dtype=torch.int64) for _ in
-                          range(self.num_instance)]
+        if tabu_size != -1:
+            self.tabu_size = [tabu_size for _ in range(self.num_instance)]
+        else:
+            self.tabu_size = []
+            for ins in instances:
+                p_j, p_m = ins.shape[1], ins.shape[2]
+                # dynamic tabu size
+                L = 10 + p_j / p_m
+                L_min = round(L)
+                if p_j <= 2 * p_m:
+                    L_max = round(1.4 * L)
+                else:
+                    L_max = round(1.5 * L)
+                self.tabu_size.append(random.randint(L_min, L_max))
+        self.tabu_list = [-torch.ones(size=[size, 2], device=device, dtype=torch.int64) for size in self.tabu_size]
+
         self.previous_action = [torch.tensor([-1, -1], device=device, dtype=torch.int64) for _ in
                                 range(self.num_instance)]
         # do not consider backward move if True, e.g., [5, 8] will be excluded if previous move is [8, 5], default True.

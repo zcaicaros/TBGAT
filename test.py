@@ -26,14 +26,14 @@ def main():
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
     # which model to load
-    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
         # env parameters
         args.tabu_size,
         # model parameters
         args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
         # training parameters
         args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size,
-        args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label
+        args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label, args.action_selection_type
     )
 
     # testing specific size
@@ -197,10 +197,11 @@ def main():
             # model parameters
             args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat)
 
-        training_config = '{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        training_config = '{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # training parameters
             args.lr, args.steps_learn, args.transit, args.batch_size,
-            args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label
+            args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label,
+            args.action_selection_type
         )
 
         for [model_j, model_m] in model_size:
