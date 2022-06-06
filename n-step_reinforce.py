@@ -19,11 +19,11 @@ class NeuralTabu:
         self.env_training = Env()
         self.env_validation = Env()
         self.eps = np.finfo(np.float32).eps.item()
-        self.algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        self.algo_config = '{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # env parameters
             args.tabu_size,
             # model parameters
-            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
+            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net,
             # training parameters
             args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
             args.step_validation, args.ent_coeff, args.embed_tabu_label, args.action_selection_type
@@ -163,6 +163,7 @@ class NeuralTabu:
               "action_selection_type={}, "
               "ent_coeff={}, "
               "tabu_size={}, "
+              "embed_net={}, "
               "hidden_channels={}, "
               "out_channels={}, "
               "heads={}, "
@@ -178,6 +179,7 @@ class NeuralTabu:
                                            args.action_selection_type,
                                            args.ent_coeff,
                                            args.tabu_size,
+                                           args.embed_net,
                                            args.hidden_channels,
                                            args.out_channels,
                                            args.heads,

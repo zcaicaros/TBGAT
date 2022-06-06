@@ -16,7 +16,7 @@ from parameters import args
 
 
 class DGHANlayer(torch.nn.Module):
-    def __init__(self, in_chnl, out_chnl, dropout, concat, heads=2):
+    def __init__(self, in_chnl, out_chnl, dropout, concat, heads=1):
         super(DGHANlayer, self).__init__()
         self.dropout = dropout
         self.opsgrp_conv = GATConv(in_chnl, out_chnl, heads=heads, dropout=dropout, concat=concat)
@@ -51,14 +51,14 @@ class DGHAN(torch.nn.Module):
             # last DGHAN layer
             self.DGHAN_layers.append(DGHANlayer(heads * hidden_dim, hidden_dim, dropout, concat=False, heads=1))
 
-    def forward(self, x, edge_index_pc, edge_index_mc, batch_size):
+    def forward(self, x, edge_index_pc, edge_index_mc, num_instances):
 
         # initial layer forward
         h_node = self.DGHAN_layers[0](x, edge_index_pc, edge_index_mc)
         for layer in range(1, self.layer_dghan):
             h_node = self.DGHAN_layers[layer](h_node, edge_index_pc, edge_index_mc)
 
-        return h_node, torch.mean(h_node.reshape(batch_size, -1, self.hidden_dim), dim=1)
+        return h_node, torch.mean(h_node.reshape(num_instances, -1, self.hidden_dim), dim=1)
 
 
 class GIN(torch.nn.Module):
@@ -119,7 +119,50 @@ class GIN(torch.nn.Module):
         return node_pool_over_layer, gPool_over_layer
 
 
-class Embed(torch.nn.Module):
+class TPMCAM(torch.nn.Module):
+    def __init__(self,
+                 in_dim=3,
+                 hidden_dim=128,
+                 embedding_l=4,
+                 heads=1,
+                 dropout=0):
+        super(TPMCAM, self).__init__()
+
+        self.embedding_gin = GIN(
+            in_dim=in_dim,
+            hidden_dim=hidden_dim,
+            layer_gin=embedding_l
+        )
+        self.embedding_dghan = DGHAN(
+            in_dim=in_dim,
+            hidden_dim=hidden_dim,
+            dropout=dropout,
+            layer_dghan=embedding_l,
+            heads=heads
+        )
+
+    def forward(self, pyg):
+
+        x = pyg.x[:, [0, 1, 2]]
+        edge_index = pyg.edge_index
+        batch = pyg.batch
+        num_instances = pyg.num_node_per_example.shape[0]
+        edge_index_pc = pyg.edge_index_conjunctions
+        edge_index_mc = pyg.edge_index_disjunctions
+
+        node_embed_gin, graph_embed_gin = self.embedding_gin(
+            x, edge_index, batch
+        )
+        node_embed_dghan, graph_embed_dghan = self.embedding_dghan(
+            x, add_self_loops(edge_index_pc)[0], add_self_loops(edge_index_mc)[0], num_instances
+        )
+        node_embed = torch.cat([node_embed_gin, node_embed_dghan], dim=-1)
+        graph_embed = torch.cat([graph_embed_gin, graph_embed_dghan], dim=-1)
+
+        return node_embed, graph_embed
+
+
+class TBGAT(torch.nn.Module):
     def __init__(self,
                  in_channels_fwd,
                  in_channels_bwd,
@@ -221,14 +264,17 @@ class Actor(torch.nn.Module):
 
         super().__init__()
 
-        self.embedding_network = Embed(
-            in_channels_fwd=in_channels_fwd,
-            in_channels_bwd=in_channels_bwd,
-            hidden_channels=hidden_channels,
-            out_channels=out_channels,
-            heads=heads,
-            drop_out_for_gat=dropout_for_gat
-        )
+        if args.embed_net == 'TBGAT':
+            self.embedding_network = TBGAT(
+                in_channels_fwd=in_channels_fwd,
+                in_channels_bwd=in_channels_bwd,
+                hidden_channels=hidden_channels,
+                out_channels=out_channels,
+                heads=heads,
+                drop_out_for_gat=dropout_for_gat
+            )
+        else:
+            self.embedding_network = TPMCAM()
 
         # policy
         self.policy = Sequential(
@@ -268,12 +314,17 @@ class Actor(torch.nn.Module):
                    )
 
         else:
-            x = pyg_sol.x
-            edge_index = pyg_sol.edge_index
-            batch = pyg_sol.batch
+            if args.embed_net == 'TBGAT':
+                x = pyg_sol.x
+                edge_index = pyg_sol.edge_index
+                batch = pyg_sol.batch
+                # embedding disjunctive graph...
+                node_h, g_pool = self.embedding_network(x, edge_index, batch, drop_out=drop_out)
+            elif args.embed_net == 'TPMCAM':
+                node_h, g_pool = self.embedding_network(pyg_sol)
+            else:
+                raise RuntimeError("Not known embed net '{}'.".format(args.embed_net))
 
-            # embedding disjunctive graph...
-            node_h, g_pool = self.embedding_network(x, edge_index, batch, drop_out=drop_out)
             node_h = torch.cat(
                 [node_h, g_pool.repeat_interleave(repeats=pyg_sol.num_node_per_example, dim=0)],
                 dim=-1

@@ -16,6 +16,7 @@ parser.add_argument('--hidden_channels', type=int, default=128)
 parser.add_argument('--out_channels', type=int, default=128)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--dropout_for_gat', type=float, default=0)
+parser.add_argument('--embed_net', type=str, default='TBGAT', choices=('TBGAT', 'TPMCAM'))
 ## training parameters
 parser.add_argument('--j', type=int, default=10)
 parser.add_argument('--m', type=int, default=10)

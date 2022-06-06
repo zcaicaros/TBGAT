@@ -26,11 +26,11 @@ def main():
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
     # which model to load
-    algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+    algo_config = '{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
         # env parameters
         args.tabu_size,
         # model parameters
-        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat,
+        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net,
         # training parameters
         args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size,
         args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label, args.action_selection_type
@@ -191,11 +191,12 @@ def main():
         mean_gap_all_model_all_benchmark = []
         csv_index = []
 
-        env_model_config = '{}_{}-{}-{}-{}'.format(
+        env_model_config = '{}_{}-{}-{}-{}-{}'.format(
             # env parameters
             args.tabu_size,
             # model parameters
-            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat)
+            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net
+        )
 
         training_config = '{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # training parameters
