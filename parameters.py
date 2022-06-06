@@ -9,13 +9,14 @@ parser.add_argument('--mask_previous_action', type=str, default='False', choices
 parser.add_argument('--path_finder', type=str, default='pytorch')
 parser.add_argument('--init_type', type=str, default='fdd-divide-wkr')
 parser.add_argument('--gamma', type=float, default=1)
-## model parameters
+## TBGAT parameters
 parser.add_argument('--in_channels_fwd', type=int, default=3)
 parser.add_argument('--in_channels_bwd', type=int, default=3)
 parser.add_argument('--hidden_channels', type=int, default=128)
 parser.add_argument('--out_channels', type=int, default=128)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--dropout_for_gat', type=float, default=0)
+## which embed net to use, if TPMCAM, its config is the same as that in the paper, the above params are no use.
 parser.add_argument('--embed_net', type=str, default='TBGAT', choices=('TBGAT', 'TPMCAM'))
 ## training parameters
 parser.add_argument('--j', type=int, default=10)
