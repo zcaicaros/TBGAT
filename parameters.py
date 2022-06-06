@@ -8,6 +8,7 @@ parser.add_argument('--mask_previous_action', type=str, default='False', choices
 parser.add_argument('--path_finder', type=str, default='pytorch')
 parser.add_argument('--init_type', type=str, default='fdd-divide-wkr')
 parser.add_argument('--gamma', type=float, default=1)
+parser.add_argument('--action_selection_type', type=str, default='ts_outer', choices=('ls', 'ts_outer', 'ts_inner'))
 # model parameters
 parser.add_argument('--in_channels_fwd', type=int, default=3)
 parser.add_argument('--in_channels_bwd', type=int, default=3)

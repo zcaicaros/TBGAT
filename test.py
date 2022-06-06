@@ -143,8 +143,7 @@ def main():
                 sampled_a, log_p, ent = policy(
                     pyg_sol=G,
                     feasible_action=action_set,
-                    optimal_mark=optimal_mark,
-                    critical_path=paths
+                    optimal_mark=optimal_mark
                 )
 
                 G, reward, (action_set, optimal_mark, paths) = env.step(
@@ -318,8 +317,7 @@ def main():
                         sampled_a, log_p, ent = policy(
                             pyg_sol=G,
                             feasible_action=action_set,
-                            optimal_mark=optimal_mark,
-                            critical_path=paths
+                            optimal_mark=optimal_mark
                         )
 
                         G, reward, (action_set, optimal_mark, paths) = env.step(

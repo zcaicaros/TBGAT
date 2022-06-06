@@ -9,7 +9,8 @@ import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 from torch.nn import Sequential, Linear, ReLU
 from torch_geometric.nn import GATConv, global_mean_pool
-from torch_geometric.utils import add_self_loops
+from torch_geometric.utils import add_self_loops, sort_edge_index
+from torch_geometric.data.batch import Batch
 from torch.nn.utils.rnn import pad_sequence
 from parameters import args
 
@@ -141,7 +142,7 @@ class Actor(torch.nn.Module):
             Linear(out_channels * 2, 1),
         )
 
-    def forward(self, pyg_sol, feasible_action, optimal_mark, critical_path=None, drop_out=0):
+    def forward(self, pyg_sol, feasible_action, optimal_mark, cmax=None, drop_out=0):
 
         action_list_merged = [actions[0] for actions in feasible_action if actions]
 
@@ -174,68 +175,313 @@ class Actor(torch.nn.Module):
                 dim=-1
             )
 
-            ## compute action probability
-            # get action embedding ready
-            action_merged_with_tabu_label = torch.cat(action_list_merged, dim=0)
-            actions_merged = action_merged_with_tabu_label[:, :2]
-            tabu_label = action_merged_with_tabu_label[:, [2]]
-            action_h = torch.cat(
-                [
-                    node_h[actions_merged[:, 0]],
-                    node_h[actions_merged[:, 1]],
-                    tabu_label
-                ],
-                dim=-1
-            )
+            if args.action_selection_type == 'ls':
+                sampled_action, log_prob_padded, entropy_padded = self.move_selector_ls(
+                    action_set=feasible_action,
+                    node_h=node_h,
+                    optimal_mark=optimal_mark
+                )
+                return sampled_action, log_prob_padded, entropy_padded
+            elif args.action_selection_type == 'ts_inner':
+                pass
+            elif args.action_selection_type == 'ts_outer':
+                sampled_action, log_prob_padded, entropy_padded = self.move_selector_ts_outer(
+                    node_h=node_h,
+                    action_set=feasible_action,
+                    optimal_mark=optimal_mark
+                )
+                return sampled_action, log_prob_padded, entropy_padded
+            else:
+                raise RuntimeError("Unsupported framework type.")
 
-            if not args.embed_tabu_label:
-                action_h = action_h[:, :-1]
+    def move_selector_ls(self,
+                         action_set,
+                         node_h,
+                         optimal_mark):
 
-            # compute action score
-            action_count = [actions[0].shape[0] for actions in feasible_action if actions]  # if no action then ignore
-            action_score = self.policy(action_h)
-            _max_count = max(action_count)
-            actions_score_split = list(torch.split(action_score, split_size_or_sections=action_count))
-            padded_score = pad_sequence(actions_score_split, padding_value=-torch.inf).transpose(0, -1).transpose(0, 1)
+        ## compute action probability
+        # get action embedding ready
+        action_merged_with_tabu_label = torch.cat([actions[0] for actions in action_set if actions], dim=0)
+        actions_merged = action_merged_with_tabu_label[:, :2]
+        tabu_label = action_merged_with_tabu_label[:, [2]]
+        action_h = torch.cat(
+            [
+                node_h[actions_merged[:, 0]],
+                node_h[actions_merged[:, 1]],
+                tabu_label
+            ],
+            dim=-1
+        )
 
-            # sample actions
-            pi = F.softmax(padded_score, dim=-1)
-            dist = Categorical(probs=pi)
-            action_id = dist.sample()
-            padded_action = pad_sequence(
-                [actions[0][:, :2] for actions in feasible_action if actions],
-            ).transpose(0, 1)
-            sampled_action = torch.gather(
-                padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
-            ).squeeze(dim=1)
-            # print(feasible_action)
-            # print(action_id)
-            # print(sampled_action)
+        if not args.embed_tabu_label:
+            action_h = action_h[:, :-1]
 
-            # greedy action
-            # action_id = torch.argmax(pi, dim=-1)
+        # compute action score
+        action_count = [actions[0].shape[0] for actions in action_set if actions]  # if no action then ignore
+        action_score = self.policy(action_h)
+        _max_count = max(action_count)
+        actions_score_split = list(torch.split(action_score, split_size_or_sections=action_count))
+        padded_score = pad_sequence(actions_score_split, padding_value=-torch.inf).transpose(0, -1).transpose(0, 1)
 
-            # compute log_p and policy entropy regardless of optimal sol
-            log_prob = dist.log_prob(action_id)
-            entropy = dist.entropy()
+        # sample actions
+        pi = F.softmax(padded_score, dim=-1)
+        dist = Categorical(probs=pi)
+        action_id = dist.sample()
+        padded_action = pad_sequence(
+            [actions[0][:, :2] for actions in action_set if actions],
+        ).transpose(0, 1)
+        sampled_action = torch.gather(
+            padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
+        ).squeeze(dim=1)
+        # print(feasible_action)
+        # print(action_id)
+        # print(sampled_action)
 
-            # compute padded log_p, where optimal sol has 0 log_0, since no action, otherwise cause shape bug
-            log_prob_padded = torch.zeros(
-                size=optimal_mark.shape,
-                device=x.device,
-                dtype=torch.float
-            )
-            log_prob_padded[~optimal_mark, :] = log_prob.squeeze()
+        # greedy action
+        # action_id = torch.argmax(pi, dim=-1)
 
-            # compute padded ent, where optimal sol has 0 ent, since no action, otherwise cause shape bug
-            entropy_padded = torch.zeros(
-                size=optimal_mark.shape,
-                device=x.device,
-                dtype=torch.float
-            )
-            entropy_padded[~optimal_mark, :] = entropy.squeeze()
+        # compute log_p and policy entropy regardless of optimal sol
+        log_prob = dist.log_prob(action_id)
+        entropy = dist.entropy()
 
-            return sampled_action, log_prob_padded, entropy_padded
+        # compute padded log_p, where optimal sol has 0 log_0, since no action, otherwise cause shape bug
+        log_prob_padded = torch.zeros(
+            size=optimal_mark.shape,
+            device=action_h.device,
+            dtype=torch.float
+        )
+        log_prob_padded[~optimal_mark, :] = log_prob.squeeze()
+
+        # compute padded ent, where optimal sol has 0 ent, since no action, otherwise cause shape bug
+        entropy_padded = torch.zeros(
+            size=optimal_mark.shape,
+            device=action_h.device,
+            dtype=torch.float
+        )
+        entropy_padded[~optimal_mark, :] = entropy.squeeze()
+
+        return sampled_action, log_prob_padded, entropy_padded
+
+    def move_selector_ts_outer(self,
+                               node_h,
+                               action_set,
+                               optimal_mark):
+
+        # compute action score
+        action_set_wo_tabu = []
+        for actions in action_set:
+            if actions:
+                cond = actions[0][:, -1] == 1
+                if cond.sum() == actions[0].shape[0]:
+                    action_set_wo_tabu.append(actions)
+                else:
+                    action_set_wo_tabu.append([actions[0][~cond, :]])
+
+        # get action embedding ready
+        action_merged_with_tabu_label = torch.cat([actions[0] for actions in action_set_wo_tabu], dim=0)
+        actions_merged = action_merged_with_tabu_label[:, :2]
+        tabu_label = action_merged_with_tabu_label[:, [2]]
+        action_h = torch.cat(
+            [
+                node_h[actions_merged[:, 0]],
+                node_h[actions_merged[:, 1]],
+                tabu_label
+            ],
+            dim=-1
+        )
+
+        if not args.embed_tabu_label:
+            action_h = action_h[:, :-1]
+
+        action_count = [actions[0].shape[0] for actions in action_set_wo_tabu]  # if no action then ignore
+        action_score = self.policy(action_h)
+        _max_count = max(action_count)
+        actions_score_split = list(torch.split(action_score, split_size_or_sections=action_count))
+        padded_score = pad_sequence(actions_score_split, padding_value=-torch.inf).transpose(0, -1).transpose(0, 1)
+
+        # sample actions
+        pi = F.softmax(padded_score, dim=-1)
+        dist = Categorical(probs=pi)
+        action_id = dist.sample()
+        padded_action = pad_sequence(
+            [actions[0][:, :2] for actions in action_set_wo_tabu],
+        ).transpose(0, 1)
+        sampled_action = torch.gather(
+            padded_action, index=action_id.repeat(1, 2).view(-1, 1, 2), dim=1
+        ).squeeze(dim=1)
+        # print(feasible_action)
+        # print(action_id)
+        # print(sampled_action)
+
+        # greedy action
+        # action_id = torch.argmax(pi, dim=-1)
+
+        # compute log_p and policy entropy regardless of optimal sol
+        log_prob = dist.log_prob(action_id)
+        entropy = dist.entropy()
+
+        # compute padded log_p, where optimal sol has 0 log_0, since no action, otherwise cause shape bug
+        log_prob_padded = torch.zeros(
+            size=optimal_mark.shape,
+            device=action_h.device,
+            dtype=torch.float
+        )
+        log_prob_padded[~optimal_mark, :] = log_prob.squeeze()
+
+        # compute padded ent, where optimal sol has 0 ent, since no action, otherwise cause shape bug
+        entropy_padded = torch.zeros(
+            size=optimal_mark.shape,
+            device=action_h.device,
+            dtype=torch.float
+        )
+        entropy_padded[~optimal_mark, :] = entropy.squeeze()
+
+        return sampled_action, log_prob_padded, entropy_padded
+
+    def move_selector_ts_inner(self,
+                               sol,
+                               cmax,
+                               action_set,
+                               action_h,
+                               optimal_mark):
+
+        # sort edge_index otherwise to_data_list() fn will be messed and bug
+        sol.edge_index = sort_edge_index(sol.edge_index)
+        # sort edge_index_disjunctions otherwise to_data_list() fn will be messed and bug
+        sol.edge_index_disjunctions = sort_edge_index(sol.edge_index_disjunctions)
+
+        # copy G for one-step forward
+        G_list = sol.to_data_list()
+        num_nodes_per_example = torch.tensor([G.num_nodes for G in G_list], device=self.device)
+        G_expanded = []
+        repeats = []
+        action_exist = []
+        for _, (a, g) in enumerate(zip(action_set, G_list)):
+            if not a:
+                G_expanded += [g.clone()]
+                repeats += [1]
+                action_exist += [False]
+            else:
+                G_expanded += [g.clone() for _ in range(a[0].shape[0])]
+                repeats += [a[0].shape[0]]
+                action_exist += [True for _ in range(a[0].shape[0])]
+        G_expanded = Batch.from_data_list(G_expanded)
+        num_nodes_per_example_one_step = torch.repeat_interleave(
+            num_nodes_per_example,
+            repeats=torch.tensor(repeats, device=self.device)
+        )
+
+        ## prepare actions for one-step rollout
+        # for rm operation id increment for old action
+        _operation_index_helper1 = torch.cumsum(
+            num_nodes_per_example, dim=0
+        ) - num_nodes_per_example
+
+        # for add operation id increment for new action
+        _operation_index_helper2 = torch.cumsum(
+            num_nodes_per_example_one_step, dim=0
+        ) - num_nodes_per_example_one_step
+        _operation_index_helper2 = _operation_index_helper2[action_exist]
+
+        # merge all action by rm and add action id
+        action_merged_one_step = torch.cat(
+            [actions[0][:, :2] - _operation_index_helper1[_] for _, actions in enumerate(action_set) if
+             actions], dim=0
+        ) + _operation_index_helper2.unsqueeze(-1)
+
+        ## one step
+        # action: u -> v
+        u = action_merged_one_step[:, 0]
+        v = action_merged_one_step[:, 1]
+        edge_index_disjunctions = G_expanded.edge_index_disjunctions
+        # mask for arcs: m^{-1}(u) -> u, u -> v, and v -> m(v), all have shape [num edge]
+        mask1 = (~torch.eq(edge_index_disjunctions[1], u.reshape(-1, 1))).sum(dim=0) == u.shape[0]  # m^{-1}(u) -> u
+        mask2 = (~torch.eq(edge_index_disjunctions[0], u.reshape(-1, 1))).sum(dim=0) == u.shape[0]  # u -> v
+        mask3 = (~torch.eq(edge_index_disjunctions[0], v.reshape(-1, 1))).sum(dim=0) == v.shape[0]  # v -> m(v)
+        # edges to be removed
+        edge_m_neg_u_to_u = edge_index_disjunctions[:, ~mask1]
+        edge_u_to_v = edge_index_disjunctions[:, ~mask2]
+        edge_v_to_mv = edge_index_disjunctions[:, ~mask3]
+        # remove arcs: m^{-1}(u) -> u, u -> v, and v -> m(v)
+        mask = mask1 * mask2 * mask3
+        edge_index_disjunctions = edge_index_disjunctions[:, mask]
+        # build new arcs m^{-1}(u) -> v
+        _idx_m_neg_u_to_v = torch.eq(edge_m_neg_u_to_u[1].unsqueeze(1), edge_u_to_v[0]).nonzero()[:, 1]
+        _edge_m_neg_u_to_v = torch.stack([edge_m_neg_u_to_u[0], edge_u_to_v[1, _idx_m_neg_u_to_v]])
+        # build new arcs v -> u
+        _edge_v_to_u = torch.flip(edge_u_to_v, dims=[0])
+        # build new arcs u -> m(v)
+        _idx_u_to_mv = torch.eq(edge_v_to_mv[0].unsqueeze(1), edge_u_to_v[1]).nonzero()[:, 1]
+        _edge_u_to_mv = torch.stack([edge_u_to_v[0, _idx_u_to_mv], edge_v_to_mv[1]])
+        # add new arcs to edge_index_disjunctions
+        edge_index_disjunctions = torch.cat(
+            [edge_index_disjunctions, _edge_m_neg_u_to_v, _edge_v_to_u, _edge_u_to_mv], dim=1
+        )  # unsorted
+
+        # Cmax before one step
+        Cmax_before_one_step = cmax.repeat_interleave(
+            repeats=torch.tensor(repeats, device=self.device)
+        )
+
+        # Cmax after one step
+        G_expanded.edge_index = torch.cat([edge_index_disjunctions, G_expanded.edge_index_conjunctions], dim=1)
+        _, _, Cmax_after_one_step, _, _, _ = self.evaluator.eval(
+            G_expanded,
+            num_nodes_per_example=num_nodes_per_example_one_step
+        )
+
+        # compute tabu label
+        tabu_label_split = [actions[0][:, 2].bool() for actions in action_set if actions]
+
+        # select action
+        splits_counts = [tb.shape[0] for tb in tabu_label_split]
+        action_set_wo_empty = [[action[0][:, :2]] for action in action_set if action]
+        Cmax_before_split = list(
+            torch.split(Cmax_before_one_step[action_exist], split_size_or_sections=splits_counts)
+        )
+        Cmax_after_split = list(
+            torch.split(Cmax_after_one_step[action_exist], split_size_or_sections=splits_counts)
+        )
+        selected_actions = []
+        for idx, (tb_label, Cmax_before, Cmax_after, action) in enumerate(
+                zip(tabu_label_split, Cmax_before_split, Cmax_after_split, action_set_wo_empty)
+        ):
+            action = action[0]  # get action tensor from list
+
+            aspiration_flag = torch.lt(Cmax_after, Cmax_before).long()
+            if (~tb_label).sum() == 0 and aspiration_flag.sum() == 0:  # random select
+                selected_a = random.choice([*action])
+                selected_actions.append(selected_a)
+            elif (~tb_label).sum() != 0:
+                if self.if_drl:
+                    sampled_action, _, _ = self.drl_agent(
+                        pyg_sol=sol,
+                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)[~tb_label, :]]],
+                        optimal_mark=optimal_mark
+                    )
+                    selected_a = sampled_action[0]
+                else:
+                    Cmax_after_non_tabu = Cmax_after[~tb_label]
+                    action_index = Cmax_after_non_tabu.argmin(dim=0)
+                    selected_a = action[~tb_label, :][action_index]
+                selected_actions.append(selected_a)
+            else:
+                if self.if_drl:
+                    sampled_action, _, _ = self.drl_agent(
+                        pyg_sol=sol,
+                        feasible_action=[[torch.cat([action, tb_label.unsqueeze(1)], dim=1)[
+                                          torch.where(aspiration_flag == 1)[0], :]]],
+                        optimal_mark=optimal_mark
+                    )
+                    selected_a = sampled_action[0]
+                else:
+                    action_index = random.choice([*torch.where(aspiration_flag == 1)[0]])
+                    selected_a = action[action_index]
+                selected_actions.append(selected_a)
+
+        selected_actions = torch.stack(selected_actions)
+
+        return selected_actions
 
 
 if __name__ == '__main__':
@@ -303,7 +549,7 @@ if __name__ == '__main__':
     # print(insts)
 
     env = Env()
-    G, (action_set, mark, paths) = env.reset(
+    G, (feasible_a, mark, paths) = env.reset(
         instances=insts,
         init_sol_type=init_type,
         tabu_size=tb_size,
@@ -336,12 +582,12 @@ if __name__ == '__main__':
 
         sampled_a, log_p, ent = net(
             pyg_sol=G,
-            feasible_action=action_set,
+            feasible_action=feasible_a,
             optimal_mark=mark,
-            critical_path=paths
+            cmax=env.current_objs
         )
 
-        G, reward, (action_set, mark, paths) = env.step(
+        G, reward, (feasible_a, mark, paths) = env.step(
             action=sampled_a,
             prt=print_step_time,
             show_action_space_compute_time=print_action_space_compute_time

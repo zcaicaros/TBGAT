@@ -234,7 +234,6 @@ class NeuralTabu:
                     pyg_sol=G,
                     feasible_action=action_set,
                     optimal_mark=optimal_mark,
-                    critical_path=paths
                 )
 
                 # step

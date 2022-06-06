@@ -586,9 +586,9 @@ class Env:
         self.S = (torch.cumsum(self.num_nodes_per_example, dim=0) - self.num_nodes_per_example).cpu().numpy()
         self.T = (torch.cumsum(self.num_nodes_per_example, dim=0) - 1).cpu().numpy()
         self.num_instance = len(instances)
+        self.tabu_size = tabu_size
         self.tabu_list = [-torch.ones(size=[tabu_size, 2], device=device, dtype=torch.int64) for _ in
                           range(self.num_instance)]
-        self.tabu_size = tabu_size
         self.previous_action = [torch.tensor([-1, -1], device=device, dtype=torch.int64) for _ in
                                 range(self.num_instance)]
         # do not consider backward move if True, e.g., [5, 8] will be excluded if previous move is [8, 5], default True.
