@@ -20,8 +20,8 @@ def main():
     print('using {} to test...'.format(dev))
 
     # MDP config
-    cap_horizon = 5000
-    performance_milestones = [500, 1000, 2000, 5000]  # [500, 1000, 2000, 5000]
+    cap_horizon = 200  # 5000
+    performance_milestones = [50, 100, 150, 200]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'last_step', 'incumbent'
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
@@ -124,6 +124,9 @@ def main():
             print('loading model from:', saved_model_path)
             policy.load_state_dict(torch.load(saved_model_path, map_location=torch.device(dev)))
 
+            pytorch_total_params = sum(p.numel() for p in policy.parameters() if p.requires_grad)
+            print('Total number of parameters of model: \n{}\n is:'.format(saved_model_path), pytorch_total_params)
+
             torch.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
             print('Starting rollout DRL policy...')
@@ -161,7 +164,7 @@ def main():
                             DRL_result = env.current_objs.cpu().squeeze().numpy()
                         result.append(DRL_result)
                         computation_time.append(time.time() - drl_start)
-                        print('For testing steps: {}    '.format(env.itr if env.itr > 500 else ' ' + str(env.itr)),
+                        print('For testing steps: {}    '.format(env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
                               'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
                               'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
     # testing all benchmark

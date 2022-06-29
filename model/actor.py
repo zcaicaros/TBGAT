@@ -497,7 +497,7 @@ class Actor(torch.nn.Module):
                                sol,
                                cmax,
                                action_set,
-                               action_h,
+                               node_h,
                                optimal_mark):
 
         # sort edge_index otherwise to_data_list() fn will be messed and bug

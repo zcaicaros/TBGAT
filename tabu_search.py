@@ -232,6 +232,7 @@ if __name__ == '__main__':
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
+    np.seterr(divide='ignore')
 
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('using {} to test TSN5...'.format(dev))
