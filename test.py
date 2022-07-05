@@ -20,7 +20,7 @@ def main():
     print('using {} to test...'.format(dev))
 
     # MDP config
-    performance_milestones = [50, 100]  # [500, 1000, 2000, 5000]
+    performance_milestones = [500, 1000, 2000, 5000]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'last_step', 'incumbent'
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
@@ -261,7 +261,7 @@ def main():
 
                 for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-                    inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))[[0], :, :, :]
+                    inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
                     print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
