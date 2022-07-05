@@ -20,8 +20,7 @@ def main():
     print('using {} to test...'.format(dev))
 
     # MDP config
-    cap_horizon = 200  # 5000
-    performance_milestones = [50, 100, 150, 200]  # [500, 1000, 2000, 5000]
+    performance_milestones = [50, 100]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'last_step', 'incumbent'
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
@@ -141,7 +140,7 @@ def main():
                 longest_path_finder=args.path_finder)
             # t4 = time.time()
             drl_start = time.time()
-            while env.itr < cap_horizon:
+            while env.itr < max(performance_milestones):
                 # t1 = time.time()
                 sampled_a, log_p, ent = policy(
                     pyg_sol=G,
@@ -191,7 +190,12 @@ def main():
             [50, 20],
         ]
 
+        # model_size = [
+        #     [6, 6],
+        # ]
+
         mean_gap_all_model_all_benchmark = []
+        mean_time_all_model_all_benchmark = []
         csv_index = []
 
         env_model_config = '{}_{}-{}-{}-{}-{}'.format(
@@ -229,6 +233,7 @@ def main():
             syn_problem_m = [10, 10, 15, 10, 15, 20, 25]  # [10, 10, 15, 10, 15, 20, 25]
 
             mean_gap_all_benchmark = []
+            mean_time_all_benchmark = []
 
             for test_t in testing_type:  # select benchmark
                 if test_t == 'syn':
@@ -252,10 +257,11 @@ def main():
                         'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn"].')
 
                 mean_gap_each_bench = []
+                mean_time_each_bench = []
 
                 for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-                    inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+                    inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))[[0], :, :, :]
 
                     print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
@@ -304,7 +310,6 @@ def main():
                     torch.cuda.manual_seed_all(seed)
                     print('Starting rollout DRL policy...')
                     # t3 = time.time()
-                    result, computation_time = [], []
                     G, (action_set, optimal_mark, paths) = env.reset(
                         instances=inst,
                         init_sol_type=init,
@@ -315,9 +320,10 @@ def main():
                     # t4 = time.time()
 
                     mean_gap_each_size = []
+                    mean_time_each_size = []
 
                     drl_start = time.time()
-                    while env.itr < cap_horizon:
+                    while env.itr < max(performance_milestones):
                         # t1 = time.time()
                         sampled_a, log_p, ent = policy(
                             pyg_sol=G,
@@ -334,35 +340,50 @@ def main():
                         # t2 = time.time()
                         for log_horizon in performance_milestones:
                             if env.itr == log_horizon:
+                                time_milestone = time.time() - drl_start
                                 csv_index.append('{} {}x{} {}'.format(test_t, p_j, p_m, log_horizon))
                                 if result_type == 'incumbent':
                                     DRL_result = env.incumbent_objs.cpu().squeeze().numpy()
                                 else:
                                     DRL_result = env.current_objs.cpu().squeeze().numpy()
-                                result.append(DRL_result)
-                                computation_time.append(time.time() - drl_start)
                                 print('For testing steps: {}    '.format(
                                     env.itr if env.itr > 500 else ' ' + str(env.itr)),
                                       'Optimal Gap: {:.6f}    '.format(
                                           ((DRL_result - gap_against) / gap_against).mean()),
-                                      'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
+                                      'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]))
                                 mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
+                                mean_time_each_size.append(time_milestone / inst.shape[0])
+                    mean_time_each_bench.append(np.array(mean_time_each_size).reshape(-1, 1))
                     mean_gap_each_bench.append(np.array(mean_gap_each_size).reshape(-1, 1))
                 mean_gap_all_benchmark.append(np.concatenate(mean_gap_each_bench, axis=0))
+                mean_time_all_benchmark.append(np.concatenate(mean_time_each_bench, axis=0))
                 mean_gap_all_benchmark.append(np.array([[-1]], dtype=float))
+                mean_time_all_benchmark.append(np.array([[-1]], dtype=float))
                 csv_index.append('dummy')
             mean_gap_all_benchmark = np.concatenate(mean_gap_all_benchmark, axis=0)
+            mean_time_all_benchmark = np.concatenate(mean_time_all_benchmark, axis=0)
             mean_gap_all_model_all_benchmark.append(mean_gap_all_benchmark)
+            mean_time_all_model_all_benchmark.append(mean_time_all_benchmark)
         mean_gap_all_model_all_benchmark = np.concatenate(mean_gap_all_model_all_benchmark, axis=1)
-        dataFrame = pd.DataFrame(
+        mean_time_all_model_all_benchmark = np.concatenate(mean_time_all_model_all_benchmark, axis=1)
+        dataFrame_gap = pd.DataFrame(
             mean_gap_all_model_all_benchmark,
             index=csv_index[:mean_gap_all_model_all_benchmark.shape[0]],
             columns=['{}x{}'.format(model_j, model_m) for [model_j, model_m] in model_size])
+        dataFrame_time = pd.DataFrame(
+            mean_time_all_model_all_benchmark,
+            index=csv_index[:mean_time_all_model_all_benchmark.shape[0]],
+            columns=['{}x{}'.format(model_j, model_m) for [model_j, model_m] in model_size])
         # writing to excel
         with pd.ExcelWriter('excel/{}.xlsx'.format(env_model_config + '_' + training_config)) as writer:
-            dataFrame.to_excel(
+            dataFrame_gap.to_excel(
                 writer,
-                sheet_name='page1',  # sheet name
+                sheet_name='mean gap',  # sheet name
+                float_format='%.8f'
+            )
+            dataFrame_time.to_excel(
+                writer,
+                sheet_name='mean time',  # sheet name
                 float_format='%.8f'
             )
 

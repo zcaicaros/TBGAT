@@ -36,9 +36,9 @@ parser.add_argument('--embed_tabu_label', type=str, default='False', choices=('T
 # ts_outer: DRL select only from non-tabu (if all tabu, then DRL consider all mv and select)
 # ts_inner: if exists non-tabu, DRL select from non-tabu, elif exists mvs meet aspiration criteria, DRL select from
 # aspiration, else random select.
-parser.add_argument('--action_selection_type', type=str, default='ts_outer', choices=('ls', 'ts_outer', 'ts_inner'))
+parser.add_argument('--action_selection_type', type=str, default='ls', choices=('ls', 'ts_outer', 'ts_inner'))
 ## testing parameters
-parser.add_argument('--test_specific_size', type=str, default='True', choices=('True', 'False'))
+parser.add_argument('--test_specific_size', type=str, default='False', choices=('True', 'False'))
 parser.add_argument('--test_synthetic', type=str, default='False', choices=('True', 'False'))
 parser.add_argument('--t_j', type=int, default=10)
 parser.add_argument('--t_m', type=int, default=10)
