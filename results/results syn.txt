@@ -1,0 +1,54 @@
+Start testing syn10x10...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_10x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_10x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.026946     Average Time: 1.6123
+For testing steps: 1000     Optimal Gap: 0.020824     Average Time: 3.2093
+For testing steps: 2000     Optimal Gap: 0.017023     Average Time: 6.4114
+For testing steps: 5000     Optimal Gap: 0.014058     Average Time: 15.9953
+
+Start testing syn15x10...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.053585     Average Time: 1.9339
+For testing steps: 1000     Optimal Gap: 0.043273     Average Time: 3.8277
+For testing steps: 2000     Optimal Gap: 0.036913     Average Time: 7.5773
+For testing steps: 5000     Optimal Gap: 0.030462     Average Time: 18.8096
+
+Start testing syn15x15...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.066593     Average Time: 2.2195
+For testing steps: 1000     Optimal Gap: 0.056146     Average Time: 4.4087
+For testing steps: 2000     Optimal Gap: 0.048336     Average Time: 8.7649
+For testing steps: 5000     Optimal Gap: 0.041167     Average Time: 21.7226
+
+Start testing syn20x10...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.033763     Average Time: 2.2323
+For testing steps: 1000     Optimal Gap: 0.024253     Average Time: 4.4093
+For testing steps: 2000     Optimal Gap: 0.019776     Average Time: 8.7060
+For testing steps: 5000     Optimal Gap: 0.014475     Average Time: 21.4721
+
+Start testing syn20x15...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.092792     Average Time: 2.6251
+For testing steps: 1000     Optimal Gap: 0.076540     Average Time: 5.1833
+For testing steps: 2000     Optimal Gap: 0.065290     Average Time: 10.2505
+For testing steps: 5000     Optimal Gap: 0.055837     Average Time: 25.3019

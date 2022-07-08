@@ -82,7 +82,7 @@ def main():
 
         for test_t in testing_type:  # select benchmark
 
-            inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+            inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))[[0], :, :, :]
 
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 

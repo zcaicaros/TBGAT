@@ -1,0 +1,68 @@
+Testing syn of size [10, 10].
+
+Start testing syn10x10...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_10x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_10x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.037472     Average Time: 9.4941
+For testing steps: 1000     Optimal Gap: 0.037472     Average Time: 18.3767
+For testing steps: 2000     Optimal Gap: 0.036229     Average Time: 35.8834
+For testing steps: 5000     Optimal Gap: 0.016349     Average Time: 89.1138
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --test_specific_size=True --path_finder=networkx --test_synthetic=True --j=15 --m=10 --t_j=15 --t_m=10
+using cuda to test...
+Testing syn of size [15, 10].
+
+Start testing syn15x10...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.042709     Average Time: 11.1536
+For testing steps: 1000     Optimal Gap: 0.042709     Average Time: 22.0321
+For testing steps: 2000     Optimal Gap: 0.042709     Average Time: 44.4356
+For testing steps: 5000     Optimal Gap: 0.036605     Average Time: 110.8238
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --test_specific_size=True --path_finder=networkx --test_synthetic=True --j=15 --m=15 --t_j=15 --t_m=15
+using cuda to test...
+Testing syn of size [15, 15].
+
+Start testing syn15x15...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_15x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.053623     Average Time: 12.4075
+For testing steps: 1000     Optimal Gap: 0.038439     Average Time: 24.2343
+For testing steps: 2000     Optimal Gap: 0.036752     Average Time: 47.5057
+For testing steps: 5000     Optimal Gap: 0.022411     Average Time: 118.5115
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --test_specific_size=True --path_finder=networkx --test_synthetic=True --j=20 --m=10 --t_j=20 --t_m=10
+using cuda to test...
+Testing syn of size [20, 10].
+
+Start testing syn20x10...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x10-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: -0.016758     Average Time: 12.7724
+For testing steps: 1000     Optimal Gap: -0.016758     Average Time: 24.9259
+For testing steps: 2000     Optimal Gap: -0.020088     Average Time: 49.1396
+For testing steps: 5000     Optimal Gap: -0.022586     Average Time: 121.1061
+czhang@d74e78044f74:~/neural-tabu-jssp-startover$ CUDA_VISIBLE_DEVICES=3 python3 test.py --test_specific_size=True --path_finder=networkx --test_synthetic=True --j=20 --m=15 --t_j=20 --t_m=15
+using cuda to test...
+Testing syn of size [20, 15].
+
+Start testing syn20x15...
+loading model from: ./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+Total number of parameters of model:
+./saved_model/incumbent_model_-1_128-128-4-0-TBGAT_20x15-1e-05-10-500-64-64000-10-1e-05-False-ls.pth
+ is: 1059841
+Starting rollout DRL policy...
+For testing steps:  500     Optimal Gap: 0.124382     Average Time: 13.7553
+For testing steps: 1000     Optimal Gap: 0.097857     Average Time: 26.7554
+For testing steps: 2000     Optimal Gap: 0.080173     Average Time: 52.8115
+For testing steps: 5000     Optimal Gap: 0.072805     Average Time: 132.4560
