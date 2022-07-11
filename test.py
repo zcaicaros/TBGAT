@@ -162,12 +162,15 @@ def main():
                             DRL_result = env.current_objs.cpu().squeeze().numpy()
                         result.append(DRL_result)
                         computation_time.append(time.time() - drl_start)
-                        print('For testing steps: {}    '.format(
-                            env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
-                              'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
-                              'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
-                        # show makespan explicitly
-                        print("Cmax is:".format(log_horizon), env.incumbent_objs.cpu().numpy())
+                        print(
+                            'For testing steps: {}    '.format(
+                                env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
+                            'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
+                            'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]),
+                            "Cmax is: {}".format(env.incumbent_objs.cpu().numpy()  # show makespan explicitly
+                                                 if env.itr > 500
+                                                 else ' ' + str(env.incumbent_objs.cpu().numpy()))
+                        )
     # testing all benchmark
     else:
         print('Testing all instances of all sizes using all models.')
@@ -354,7 +357,9 @@ def main():
                                     'Optimal Gap: {:.6f}    '.format(
                                         ((DRL_result - gap_against) / gap_against).mean()),
                                     'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]),
-                                    "Cmax is:", env.incumbent_objs.cpu().numpy())
+                                    "Cmax is: {}".format(env.incumbent_objs.cpu().numpy()  # show makespan explicitly
+                                                         if env.itr > 500
+                                                         else ' ' + str(env.incumbent_objs.cpu().numpy())))
                                 # show makespan explicitly
                                 # print()
                                 mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
