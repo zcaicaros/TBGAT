@@ -10,7 +10,6 @@ import pandas as pd
 
 
 def main():
-
     seed = args.t_seed
     random.seed(seed)
     np.random.seed(seed)
@@ -163,7 +162,8 @@ def main():
                             DRL_result = env.current_objs.cpu().squeeze().numpy()
                         result.append(DRL_result)
                         computation_time.append(time.time() - drl_start)
-                        print('For testing steps: {}    '.format(env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
+                        print('For testing steps: {}    '.format(
+                            env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
                               'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
                               'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
                         # show makespan explicitly
@@ -216,7 +216,8 @@ def main():
 
         for [model_j, model_m] in model_size:
 
-            testing_type = ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
+            testing_type = ['tai', 'abz', 'ft', 'la', 'swv', 'orb',
+                            'yn']  # ['tai', 'abz', 'ft', 'la', 'swv', 'orb', 'yn']
             tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
             tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
             abz_problem_j = [10, 20]  # [10, 20]
@@ -350,11 +351,12 @@ def main():
                                     DRL_result = env.current_objs.cpu().squeeze().numpy()
                                 print('For testing steps: {}    '.format(
                                     env.itr if env.itr > 500 else ' ' + str(env.itr)),
-                                      'Optimal Gap: {:.6f}    '.format(
-                                          ((DRL_result - gap_against) / gap_against).mean()),
-                                      'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]))
-                                # # show makespan explicitly
-                                # print("Cmax is:".format(log_horizon), env.incumbent_objs.cpu().numpy())
+                                    'Optimal Gap: {:.6f}    '.format(
+                                        ((DRL_result - gap_against) / gap_against).mean()),
+                                    'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]),
+                                    "Cmax is:", env.incumbent_objs.cpu().numpy())
+                                # show makespan explicitly
+                                # print()
                                 mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
                                 mean_time_each_size.append(time_milestone / inst.shape[0])
                     mean_time_each_bench.append(np.array(mean_time_each_size).reshape(-1, 1))
@@ -393,5 +395,4 @@ def main():
 
 
 if __name__ == '__main__':
-
     main()
