@@ -166,6 +166,8 @@ def main():
                         print('For testing steps: {}    '.format(env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
                               'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
                               'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]))
+                        # show makespan explicitly
+                        print("Cmax is:".format(log_horizon), env.incumbent_objs.cpu().numpy())
     # testing all benchmark
     else:
         print('Testing all instances of all sizes using all models.')
@@ -351,6 +353,8 @@ def main():
                                       'Optimal Gap: {:.6f}    '.format(
                                           ((DRL_result - gap_against) / gap_against).mean()),
                                       'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]))
+                                # # show makespan explicitly
+                                # print("Cmax is:".format(log_horizon), env.incumbent_objs.cpu().numpy())
                                 mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
                                 mean_time_each_size.append(time_milestone / inst.shape[0])
                     mean_time_each_bench.append(np.array(mean_time_each_size).reshape(-1, 1))
