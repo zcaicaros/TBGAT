@@ -168,8 +168,7 @@ def main():
                             'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
                             'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]),
                             "Cmax is: {}".format(env.incumbent_objs.cpu().numpy()  # show makespan explicitly
-                                                 if env.itr > 500
-                                                 else ' ' + str(env.incumbent_objs.cpu().numpy()))
+                                                 )
                         )
     # testing all benchmark
     else:
@@ -358,8 +357,8 @@ def main():
                                         ((DRL_result - gap_against) / gap_against).mean()),
                                     'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]),
                                     "Cmax is: {}".format(env.incumbent_objs.cpu().numpy()  # show makespan explicitly
-                                                         if env.itr > 500
-                                                         else ' ' + str(env.incumbent_objs.cpu().numpy())))
+                                                         )
+                                )
                                 # show makespan explicitly
                                 # print()
                                 mean_gap_each_size.append(((DRL_result - gap_against) / gap_against).mean())
