@@ -18,7 +18,7 @@ ARG torch_scatter_ver=2.0.9
 ARG torch_sparse_ver=0.6.12
 ARG pyg_ver=2.0.3
 ARG matplotlib_ver=3.4.3
-ARG ortools_ver=9.0.9048
+ARG ortools_ver=9.3.10497 # 9.0.9048
 
 # Install some basic utilities and create users
 RUN apt-get update && apt-get install -y \

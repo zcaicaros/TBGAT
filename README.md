@@ -12,7 +12,7 @@ pip install torch-scatter==2.0.9 -f https://pytorch-geometric.com/whl/torch-1.10
 pip install torch-sparse==0.6.12 -f https://pytorch-geometric.com/whl/torch-1.10.0+cu102.html
 pip install torch-geometric==2.0.3
 pip install matplotlib==3.4.3
-pip install ortools==9.0.9048
+pip install ortools==9.3.10497
 pip install openpyxl
 ```
 
