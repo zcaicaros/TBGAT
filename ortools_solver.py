@@ -82,7 +82,7 @@ if __name__ == '__main__':
     init_type = ['fdd-divide-mwkr']  # ['fdd-divide-mwkr', 'spt']
     testing_type = ['syn']  # ['tai', 'abz', 'orb', 'yn', 'swv', 'la', 'ft', 'syn', 'validation']
     syn_problem_j = [1000]  # [10, 15, 15, 20, 20, 100, 200]
-    syn_problem_m = [200]  # [10, 10, 15, 10, 15, 20, 50]
+    syn_problem_m = [80]  # [10, 10, 15, 10, 15, 20, 50]
     validation_j = [10, 15, 15, 20, 20]  # [10, 15, 15, 20, 20]
     validation_m = [10, 10, 15, 10, 15]  # [10, 10, 15, 10, 15]
     tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
