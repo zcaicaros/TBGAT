@@ -23,19 +23,21 @@ def main():
     result_type = 'incumbent'  # 'last_step', 'incumbent'
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
-    # which model to load
-    algo_config = '{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
-        # env parameters
-        args.tabu_size,
-        # model parameters
-        args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net,
-        # training parameters
-        args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
-        args.step_validation, args.ent_coeff, args.training_seed, args.embed_tabu_label, args.action_selection_type
-    )
-
     # testing specific size
     if args.test_specific_size == 'True':
+
+        # which model to load
+        algo_config = '{}-{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+            # env parameters
+            args.tabu_size,
+            args.init_type,
+            # model parameters
+            args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net,
+            # training parameters
+            args.j, args.m, args.lr, args.steps_learn, args.transit, args.batch_size, args.total_instances,
+            args.step_validation, args.ent_coeff, args.training_seed, args.embed_tabu_label, args.action_selection_type
+        )
+
         test_instance_size = [p_j, p_m] = [args.t_j, args.t_m]
         if args.test_synthetic == 'False':
             print('Testing all open benchmark of size {}.'.format(test_instance_size))
@@ -202,17 +204,18 @@ def main():
         mean_time_all_model_all_benchmark = []
         csv_index = []
 
-        env_model_config = '{}_{}-{}-{}-{}-{}'.format(
+        env_model_config = '{}-{}_{}-{}-{}-{}-{}'.format(
             # env parameters
             args.tabu_size,
+            args.init_type,
             # model parameters
             args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net
         )
 
-        training_config = '{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        training_config = '{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # training parameters
             args.lr, args.steps_learn, args.transit, args.batch_size,
-            args.total_instances, args.step_validation, args.ent_coeff, args.embed_tabu_label,
+            args.total_instances, args.step_validation, args.ent_coeff, args.training_seed, args.embed_tabu_label,
             args.action_selection_type
         )
 

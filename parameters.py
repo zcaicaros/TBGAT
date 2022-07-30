@@ -7,7 +7,7 @@ parser.add_argument('--tabu_size', type=int, default=-1)  # -1 = dynamic tabu si
 # https://www.sciencedirect.com/science/article/pii/S0305054805003989?casa_token=_PxtWhxsw4UAAAAA:IFo4CA7ZBLuTzoTbhMWAOPihkz99jh-Jy3Y9uO3fTLGZVCYUC28Ay8oo2trUvqt7qcp08kyz8IA
 parser.add_argument('--mask_previous_action', type=str, default='False', choices=('True', 'False'))
 parser.add_argument('--path_finder', type=str, default='pytorch')
-parser.add_argument('--init_type', type=str, default='fdd-divide-wkr')
+parser.add_argument('--init_type', type=str, default='fdd-divide-wkr')  # fdd-divide-wkr, spt
 parser.add_argument('--gamma', type=float, default=1)
 ## TBGAT parameters
 parser.add_argument('--in_channels_fwd', type=int, default=3)
@@ -23,7 +23,7 @@ parser.add_argument('--j', type=int, default=10)
 parser.add_argument('--m', type=int, default=10)
 parser.add_argument('--l', type=int, default=1)
 parser.add_argument('--h', type=int, default=99)
-parser.add_argument('--lr', type=float, default=5e-5)
+parser.add_argument('--lr', type=float, default=1e-5)
 parser.add_argument('--steps_learn', type=int, default=10)
 parser.add_argument('--transit', type=int, default=500)
 parser.add_argument('--batch_size', type=int, default=64)

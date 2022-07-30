@@ -19,9 +19,10 @@ class NeuralTabu:
         self.env_training = Env()
         self.env_validation = Env()
         self.eps = np.finfo(np.float32).eps.item()
-        self.algo_config = '{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        self.algo_config = '{}-{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # env parameters
             args.tabu_size,
+            args.init_type,
             # model parameters
             args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net,
             # training parameters
@@ -159,6 +160,7 @@ class NeuralTabu:
         print()
         print("Use {} to train...".format(dev))
         print("{}x{}, "
+              "init_type={}, "
               "lr={}, "
               "action_selection_type={}, "
               "ent_coeff={}, "
@@ -176,6 +178,7 @@ class NeuralTabu:
               "training_seed={}, "
               "embed_tabu_label={}".format(args.j,
                                            args.m,
+                                           args.init_type,
                                            args.lr,
                                            args.action_selection_type,
                                            args.ent_coeff,
