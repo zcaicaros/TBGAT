@@ -9,19 +9,19 @@ train_log_seed_1 = np.load(
 train_log_seed_3 = np.load(
     'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_10x10-5e-05-10-500-64-128000-10-1e-05-3-False-ls.npy'
 )
-# train_log_seed_6 = np.load(
-#     'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_10x10-5e-05-10-500-64-128000-10-1e-05-6-False-ls.npy'
-# )
+train_log_seed_6 = np.load(
+    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_10x10-5e-05-10-500-64-128000-10-1e-05-6-False-ls.npy'
+)
 
 mean = np.stack([
     train_log_seed_1,
     train_log_seed_3,
-    # train_log_seed_6
+    train_log_seed_6
 ]).mean(axis=0)
 std = np.stack([
     train_log_seed_1,
     train_log_seed_3,
-    # train_log_seed_6
+    train_log_seed_6
 ]).std(axis=0)
 
 scale = 4
@@ -32,9 +32,6 @@ fig, ax = plt.subplots(figsize=(scale * 1.618, scale))
 x = np.arange(mean.shape[0] // plot_step_size_training)
 mean = mean.reshape(mean.shape[0] // plot_step_size_training, -1).mean(-1)
 std = std.reshape(std.shape[0] // plot_step_size_training, -1).mean(-1)
-
-print(x.shape)
-print(mean.shape)
 
 base_line1, = ax.plot(x, mean, 'blue', label="10x10")
 ax.fill_between(x, mean - std / 2, mean + std / 2, facecolor=base_line1.get_color(), alpha=0.2)
