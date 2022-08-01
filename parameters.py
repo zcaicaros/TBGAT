@@ -33,6 +33,7 @@ parser.add_argument('--ent_coeff', type=float, default=1e-5)
 parser.add_argument('--validation_inst_number', type=int, default=100)
 parser.add_argument('--training_seed', type=int, default=6)  # 6
 parser.add_argument('--embed_tabu_label', type=str, default='False', choices=('True', 'False'))
+parser.add_argument('--problem_type', type=str, default='FSSP', choices=('FSSP', 'JSSP'))
 # ts_outer: DRL select only from non-tabu (if all tabu, then DRL consider all mv and select)
 # ts_inner: if exists non-tabu, DRL select from non-tabu, elif exists mvs meet aspiration criteria, DRL select from
 # aspiration, else random select.

@@ -31,8 +31,8 @@ class NeuralTabu:
         )
 
         # load or generate validation dataset
-        validation_data_path = './validation_data/validation_data_and_Cmax_{}x{}_[{},{}].npy'.format(
-            args.j, args.m, args.l, args.h
+        validation_data_path = './validation_data/{}_validation_data_and_Cmax_{}x{}_[{},{}].npy'.format(
+            args.problem_type, args.j, args.m, args.l, args.h
         )
         # load
         if Path(validation_data_path).is_file():
@@ -41,7 +41,7 @@ class NeuralTabu:
             self.validation_Cmax = self.validation_data_and_Cmax[:, -1, 0, 0].astype(float)
         # generate
         else:
-            print('No validation data for {}x{}[{},{}], generating new one.'.format(args.j, args.m, args.l, args.h))
+            print('No validation data for {}-{}x{}[{},{}], generating new one.'.format(args.problem_type, args.j, args.m, args.l, args.h))
             self.validation_data = np.array(
                 [inst_gen(n_j=args.j, n_m=args.m, low=args.l, high=args.h) for _ in range(args.validation_inst_number)]
             )
@@ -159,7 +159,8 @@ class NeuralTabu:
 
         print()
         print("Use {} to train...".format(dev))
-        print("{}x{}, "
+        print("{}, "
+              "{}x{}, "
               "init_type={}, "
               "lr={}, "
               "action_selection_type={}, "
@@ -176,7 +177,8 @@ class NeuralTabu:
               "total_instances={}, "
               "step_validation={}, "
               "training_seed={}, "
-              "embed_tabu_label={}".format(args.j,
+              "embed_tabu_label={}".format(args.problem_type,
+                                           args.j,
                                            args.m,
                                            args.init_type,
                                            args.lr,

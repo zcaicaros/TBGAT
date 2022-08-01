@@ -4,9 +4,10 @@ import torch
 from tqdm import tqdm
 
 
+problem_type = 'JSSP'
 j = 30
 m = 20
-data = np.load('./validation_data/validation_data_and_Cmax_{}x{}_[1,99].npy'.format(j, m))
+data = np.load('./validation_data/{}_validation_data_and_Cmax_{}x{}_[1,99].npy'.format(problem_type, j, m))
 print(data[0, 1, 0])
 # data[:, 1, :, :] += 1
 # print(data[0, 1, 0])
