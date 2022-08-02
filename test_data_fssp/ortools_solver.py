@@ -79,9 +79,9 @@ if __name__ == '__main__':
 
     l = 1
     h = 99
-    testing_type = ['tai']  # ['tai', 'abz', 'orb', 'yn', 'swv', 'la', 'ft', 'syn', 'validation']
-    tai_problem_j = [20, 20, 20]  # [15, 20, 20, 30, 30, 50, 50, 100]
-    tai_problem_m = [5, 10, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
+    testing_type = ['tai']  # ['tai']
+    tai_problem_j = [20]  # [20, 20, 20]
+    tai_problem_m = [20]  # [5, 10, 20]
 
     for test_t in testing_type:  # select benchmark
         if test_t == 'tai':
@@ -98,7 +98,7 @@ if __name__ == '__main__':
             # read saved gap_against or use ortools to solve it.
             if test_t in ['tai']:
                 from pathlib import Path
-                ortools_path = Path('./ortools_result/ortools_{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                ortools_path = Path('./ortools_result_FSSP-{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if not ortools_path.is_file():
                     gap_against = np.load('./{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     results = []
@@ -118,8 +118,8 @@ if __name__ == '__main__':
                     ortools_obj = results[:, 1]
                     ortools_gap = (ortools_obj - gap_against)/gap_against
                     ortools_gap_mean = ortools_gap.mean()
-                    np.save('./ortools_result/ortools_{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
-                    np.save('./ortools_result/ortools_{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
+                    np.save('./ortools_result_FSSP-{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
+                    np.save('./ortools_result_FSSP{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
                     print('Or-Tools mean gap:', ortools_gap_mean)
                     print('Or-Tools mean time:', time_log.mean())
             else:
