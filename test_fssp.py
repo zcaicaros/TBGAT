@@ -148,7 +148,7 @@ def main():
             args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net
         )
 
-        training_config = 'FSSP-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        training_config = '{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # training parameters
             args.lr, args.steps_learn, args.transit, args.batch_size,
             args.total_instances, args.step_validation, args.ent_coeff, args.training_seed, args.embed_tabu_label,
@@ -159,7 +159,7 @@ def main():
 
             testing_type = ['tai']  # ['tai']
             tai_problem_j = [20, 20, 20]  # [20, 20, 20]
-            tai_problem_m = [5, 15, 20]  # [5, 15, 20]
+            tai_problem_m = [5, 10, 20]  # [5, 15, 20]
 
             mean_gap_all_benchmark = []
             mean_time_all_benchmark = []
@@ -275,7 +275,7 @@ def main():
             index=csv_index[:mean_time_all_model_all_benchmark.shape[0]],
             columns=['{}x{}'.format(model_j, model_m) for [model_j, model_m] in model_size])
         # writing to excel
-        with pd.ExcelWriter('excel/{}.xlsx'.format(env_model_config + '_' + training_config)) as writer:
+        with pd.ExcelWriter('excel/FSSP-{}.xlsx'.format(env_model_config + '_' + training_config)) as writer:
             dataFrame_gap.to_excel(
                 writer,
                 sheet_name='mean gap',  # sheet name

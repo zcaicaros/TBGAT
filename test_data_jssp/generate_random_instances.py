@@ -2,8 +2,8 @@ import numpy as np
 from env.generateJSP import uni_instance_gen
 
 
-j = 500
-m = 60
+j = 1000
+m = 40
 l = 1
 h = 99
 size = 10
