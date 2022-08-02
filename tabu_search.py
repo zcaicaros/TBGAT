@@ -299,19 +299,19 @@ if __name__ == '__main__':
             print('Testing syn of size {}.'.format(test_instance_size))
 
         for test_t in testing_type:  # select benchmark
-            inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+            inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
             # read saved gap_against or use ortools to solve it.
             if test_t != 'syn':
-                gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
             else:
                 # ortools solver
                 from pathlib import Path
 
-                ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                ortools_path = Path('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if ortools_path.is_file():
-                    gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 else:
                     ortools_results = []
                     print('Starting Ortools...')
@@ -323,7 +323,7 @@ if __name__ == '__main__':
                         print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
                         ortools_results.append(result)
                     ortools_results = np.array(ortools_results)
-                    np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
+                    np.save('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                     gap_against = ortools_results[:, 1]
 
             # start to test
@@ -384,20 +384,20 @@ if __name__ == '__main__':
 
             for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-                inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+                inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
                 print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
                 # read saved gap_against or use ortools to solve it.
                 if test_t != 'syn':
-                    gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 else:
                     # ortools solver
                     from pathlib import Path
 
-                    ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    ortools_path = Path('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     if ortools_path.is_file():
-                        gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                        gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     else:
                         ortools_results = []
                         print('Starting Ortools...')
@@ -409,7 +409,7 @@ if __name__ == '__main__':
                             print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
                             ortools_results.append(result)
                         ortools_results = np.array(ortools_results)
-                        np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
+                        np.save('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                         gap_against = ortools_results[:, 1]
 
                 # start to test

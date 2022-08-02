@@ -4,13 +4,13 @@ import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 
 train_log_seed_1 = np.load(
-    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_10x10-5e-05-10-500-64-128000-10-1e-05-1-False-ls.npy'
+    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_JSSP-10x10-5e-05-10-500-64-128000-10-1e-05-1-False-ls.npy'
 )
 train_log_seed_3 = np.load(
-    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_10x10-5e-05-10-500-64-128000-10-1e-05-3-False-ls.npy'
+    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_JSSP-10x10-5e-05-10-500-64-128000-10-1e-05-3-False-ls.npy'
 )
 train_log_seed_6 = np.load(
-    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_10x10-5e-05-10-500-64-128000-10-1e-05-6-False-ls.npy'
+    'log/training_log_-1-fdd-divide-wkr_128-128-4-0-TPMCAM_JSSP-10x10-5e-05-10-500-64-128000-10-1e-05-6-False-ls.npy'
 )
 
 mean = np.stack([

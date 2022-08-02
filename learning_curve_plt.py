@@ -3,39 +3,45 @@ import matplotlib.pyplot as plt
 
 
 # env parameters
-tabu_size = 20
+tabu_size = -1
 # model parameters
+embed_model = 'TPMCAM'
 hidden_channels = 128
 out_channels = 128
 heads = 4
 dropout_for_gat = 0
 # training parameters
+problem_type = 'JSSP'
+init_type = 'fdd-divide-wkr'
+action_selection_type = 'ls'
+seed = 6
 j = 10
 m = 10
-lr = 1e-5
+lr = 5e-5
 steps_learn = 10
 transit = 500
 batch_size = 64
-total_instances = 64000
+total_instances = 128000
 step_validation = 10
 ent_coeff = 1e-5
 embed_tabu_label = False
 
-algo_config = '{}_{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+algo_config = '{}-{}_{}-{}-{}-{}-{}_{}-{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
     # env parameters
     tabu_size,
+    init_type,
     # model parameters
-    hidden_channels, out_channels, heads, dropout_for_gat,
+    hidden_channels, out_channels, heads, dropout_for_gat, embed_model,
     # training parameters
-    j, m, lr, steps_learn, transit, batch_size, total_instances, step_validation, ent_coeff, embed_tabu_label
+    problem_type, j, m, lr, steps_learn, transit, batch_size, total_instances, step_validation, ent_coeff,
+    seed, str(embed_tabu_label), action_selection_type
 )
 
 # plot parameters
-total_plt_steps = 50
+total_plt_steps = 200
 show = True
 save = False
-log_type = 'validation'  # 'training', 'validation'
-value_type = 'last_step'  # 'last_step', 'incumbent'
+log_type = 'training'  # 'training', 'validation'
 plot_step_size_training = (total_instances // batch_size) // total_plt_steps
 plot_step_size_validation = (total_instances // batch_size) // (total_plt_steps * 10)
 save_file_type = '.pdf'

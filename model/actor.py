@@ -700,7 +700,7 @@ if __name__ == '__main__':
             )
             insts.append(inst)
 
-    # insts = np.load('../test_data/tai20x15.npy')
+    # insts = np.load('../test_data_jssp/tai20x15.npy')
     # print(insts)
 
     env = Env()

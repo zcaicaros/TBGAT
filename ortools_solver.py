@@ -129,7 +129,7 @@ if __name__ == '__main__':
             if test_t == 'validation':
                 inst = np.load('./validation_data/validation_instance_{}x{}[1,99].npy'.format(p_j, p_m))
             else:
-                inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+                inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
             print('\nStart solving {}{}x{} using OR-Tools...\n'.format(test_t, p_j, p_m))
 
             # read saved gap_against or use ortools to solve it.
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                 from pathlib import Path
                 ortools_path = Path('./ortools_result/ortools_{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if not ortools_path.is_file():
-                    gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     results = []
                     time_log = []
                     for i, data in enumerate(inst):
@@ -186,7 +186,7 @@ if __name__ == '__main__':
             else:
                 # ortools solver
                 from pathlib import Path
-                ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                ortools_path = Path('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if not ortools_path.is_file():
                     results = []
                     time_log = []
@@ -203,7 +203,7 @@ if __name__ == '__main__':
                         time_log.append(time_end - time_start)
                     results = np.array(results)
                     time_log = np.array(time_log)
-                    np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
-                    np.save('./test_data/{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
+                    np.save('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
+                    np.save('./test_data_jssp/{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
                     print('Or-Tools mean gap:', 0)
                     print('Or-Tools mean time:', time_log.mean())

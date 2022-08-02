@@ -644,7 +644,7 @@ if __name__ == '__main__':
         [uni_instance_gen(n_j=np.random.randint(**j), n_m=np.random.randint(**m), low=l, high=h)]
     ) for _ in range(batch_size)]
 
-    # insts = np.load('../test_data/tai20x15.npy')
+    # insts = np.load('../test_data_jssp/tai20x15.npy')
     # print(insts)
 
     env = Env()

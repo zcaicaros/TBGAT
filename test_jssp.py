@@ -27,7 +27,7 @@ def main():
     if args.test_specific_size == 'True':
 
         # which model to load
-        algo_config = '{}-{}_{}-{}-{}-{}-{}_{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        algo_config = '{}-{}_{}-{}-{}-{}-{}_JSSP-{}x{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # env parameters
             args.tabu_size,
             args.init_type,
@@ -83,19 +83,19 @@ def main():
 
         for test_t in testing_type:  # select benchmark
 
-            inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))  # [[0], :, :, :]
+            inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))  # [[0], :, :, :]
 
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
             # read saved gap_against or use ortools to solve it.
             if test_t != 'syn':
-                gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
             else:
                 # ortools solver
                 from pathlib import Path
-                ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                ortools_path = Path('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if ortools_path.is_file():
-                    gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 else:
                     ortools_results = []
                     print('Starting Ortools...')
@@ -107,7 +107,7 @@ def main():
                         print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
                         ortools_results.append(result)
                     ortools_results = np.array(ortools_results)
-                    np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
+                    np.save('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                     gap_against = ortools_results[:, 1]
 
             env = Env()
@@ -269,19 +269,19 @@ def main():
 
                 for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-                    inst = np.load('./test_data/{}{}x{}.npy'.format(test_t, p_j, p_m))
+                    inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
                     print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
                     # read saved gap_against or use ortools to solve it.
                     if test_t != 'syn':
-                        gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                        gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     else:
                         # ortools solver
                         from pathlib import Path
-                        ortools_path = Path('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                        ortools_path = Path('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                         if ortools_path.is_file():
-                            gap_against = np.load('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                            gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                         else:
                             ortools_results = []
                             print('Starting Ortools...')
@@ -293,7 +293,7 @@ def main():
                                 print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
                                 ortools_results.append(result)
                             ortools_results = np.array(ortools_results)
-                            np.save('./test_data/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
+                            np.save('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m), ortools_results)
                             gap_against = ortools_results[:, 1]
 
                     env = Env()
@@ -306,7 +306,7 @@ def main():
                         dropout_for_gat=args.dropout_for_gat
                     ).to(dev).eval()
 
-                    model_size_config = '{}x{}'.format(model_j, model_m)
+                    model_size_config = 'JSSP-{}x{}'.format(model_j, model_m)
 
                     algo_config = env_model_config + '_' + model_size_config + '-' + training_config
 
