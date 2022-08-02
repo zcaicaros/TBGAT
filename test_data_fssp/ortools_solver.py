@@ -79,64 +79,28 @@ if __name__ == '__main__':
 
     l = 1
     h = 99
-    init_type = ['fdd-divide-mwkr']  # ['fdd-divide-mwkr', 'spt']
-    testing_type = ['syn']  # ['tai', 'abz', 'orb', 'yn', 'swv', 'la', 'ft', 'syn', 'validation']
-    syn_problem_j = [1000]  # [10, 15, 15, 20, 20, 100, 200]
-    syn_problem_m = [80]  # [10, 10, 15, 10, 15, 20, 50]
-    validation_j = [10, 15, 15, 20, 20]  # [10, 15, 15, 20, 20]
-    validation_m = [10, 10, 15, 10, 15]  # [10, 10, 15, 10, 15]
-    tai_problem_j = [15, 20, 20, 30, 30, 50, 50, 100]  # [15, 20, 20, 30, 30, 50, 50, 100]
-    tai_problem_m = [15, 15, 20, 15, 20, 15, 20, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
-    abz_problem_j = [10, 20]  # [10, 20]
-    abz_problem_m = [10, 15]  # [10, 15]
-    orb_problem_j = [10]  # [10]
-    orb_problem_m = [10]  # [10]
-    yn_problem_j = [20]  # [20]
-    yn_problem_m = [20]  # [20]
-    swv_problem_j = [20, 20, 50]  # [20, 20, 50]
-    swv_problem_m = [10, 15, 10]  # [10, 15, 10]
-    la_problem_j = [10, 15, 20, 10, 15, 20, 30, 15]  # [10, 15, 20, 10, 15, 20, 30, 15]
-    la_problem_m = [5, 5, 5, 10, 10, 10, 10, 15]  # [5, 5, 5, 10, 10, 10, 10, 15]
-    ft_problem_j = [6, 10, 20]  # [6, 10, 20]
-    ft_problem_m = [6, 10, 5]  # [6, 10, 5]
+    testing_type = ['tai']  # ['tai', 'abz', 'orb', 'yn', 'swv', 'la', 'ft', 'syn', 'validation']
+    tai_problem_j = [20, 20, 20]  # [15, 20, 20, 30, 30, 50, 50, 100]
+    tai_problem_m = [5, 10, 20]  # [15, 15, 20, 15, 20, 15, 20, 20]
 
     for test_t in testing_type:  # select benchmark
-        if test_t == 'syn':
-            problem_j, problem_m = syn_problem_j, syn_problem_m
-        elif test_t == 'validation':
-            problem_j, problem_m = validation_j, validation_m
-        elif test_t == 'tai':
+        if test_t == 'tai':
             problem_j, problem_m = tai_problem_j, tai_problem_m
-        elif test_t == 'abz':
-            problem_j, problem_m = abz_problem_j, abz_problem_m
-        elif test_t == 'orb':
-            problem_j, problem_m = orb_problem_j, orb_problem_m
-        elif test_t == 'yn':
-            problem_j, problem_m = yn_problem_j, yn_problem_m
-        elif test_t == 'swv':
-            problem_j, problem_m = swv_problem_j, swv_problem_m
-        elif test_t == 'la':
-            problem_j, problem_m = la_problem_j, la_problem_m
-        elif test_t == 'ft':
-            problem_j, problem_m = ft_problem_j, ft_problem_m
         else:
             raise Exception(
-                'Problem type must be in testing_type = ["tai", "abz", "orb", "yn", "swv", "la", "ft", "syn", "validation"].')
+                'Problem type must be in testing_type = ["tai"].')
 
         for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-            if test_t == 'validation':
-                inst = np.load('./validation_data/validation_instance_{}x{}[1,99].npy'.format(p_j, p_m))
-            else:
-                inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
-            print('\nStart solving {}{}x{} using OR-Tools...\n'.format(test_t, p_j, p_m))
+            inst = np.load('./{}{}x{}.npy'.format(test_t, p_j, p_m))
+            print('\nStart solving FSSP-{}{}x{} using OR-Tools...\n'.format(test_t, p_j, p_m))
 
             # read saved gap_against or use ortools to solve it.
-            if test_t in ['tai', 'abz', 'orb', 'yn', 'swv', 'la', 'ft']:
+            if test_t in ['tai']:
                 from pathlib import Path
                 ortools_path = Path('./ortools_result/ortools_{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if not ortools_path.is_file():
-                    gap_against = np.load('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    gap_against = np.load('./{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                     results = []
                     time_log = []
                     for i, data in enumerate(inst):
@@ -158,34 +122,10 @@ if __name__ == '__main__':
                     np.save('./ortools_result/ortools_{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
                     print('Or-Tools mean gap:', ortools_gap_mean)
                     print('Or-Tools mean time:', time_log.mean())
-            elif test_t == 'validation':
-                # ortools solver
-                from pathlib import Path
-                ortools_path = Path('./validation_data/{}{}x{}_ortools_result.npy'.format(test_t, p_j, p_m))
-                if not ortools_path.is_file():
-                    results = []
-                    time_log = []
-                    print('Starting Ortools...')
-                    for i, data in enumerate(inst):
-                        time_start = time.time()
-                        times_rearrange = np.expand_dims(data[0], axis=-1)
-                        machines_rearrange = np.expand_dims(data[1], axis=-1)
-                        data = np.concatenate((machines_rearrange, times_rearrange), axis=-1)
-                        result = MinimalJobshopSat(data.tolist())
-                        print('Instance-' + str(i + 1) + ' Ortools makespan:', result)
-                        results.append(result[1])
-                        time_end = time.time()
-                        time_log.append(time_end - time_start)
-                    results = np.array(results)
-                    time_log = np.array(time_log)
-                    np.save('./validation_data/{}{}x{}_ortools_result.npy'.format(test_t, p_j, p_m), results)
-                    np.save('./validation_data/{}{}x{}_ortools_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
-                    print('Or-Tools mean gap:', 0)
-                    print('Or-Tools mean time:', time_log.mean())
             else:
                 # ortools solver
                 from pathlib import Path
-                ortools_path = Path('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                ortools_path = Path('./{}{}x{}_result.npy'.format(test_t, p_j, p_m))
                 if not ortools_path.is_file():
                     results = []
                     time_log = []
@@ -202,7 +142,7 @@ if __name__ == '__main__':
                         time_log.append(time_end - time_start)
                     results = np.array(results)
                     time_log = np.array(time_log)
-                    np.save('./test_data_jssp/{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
-                    np.save('./test_data_jssp/{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
+                    np.save('./{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
+                    np.save('./{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
                     print('Or-Tools mean gap:', 0)
                     print('Or-Tools mean time:', time_log.mean())

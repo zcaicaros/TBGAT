@@ -2,7 +2,7 @@ import pandas
 import numpy as np
 
 j = 20
-m = 5
+m = 20
 processing_time = np.loadtxt('./tai_{}x{}.txt'.format(j, m), dtype=int)
 
 
