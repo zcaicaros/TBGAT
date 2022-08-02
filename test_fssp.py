@@ -148,7 +148,7 @@ def main():
             args.hidden_channels, args.out_channels, args.heads, args.dropout_for_gat, args.embed_net
         )
 
-        training_config = '{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
+        training_config = 'FSSP-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(
             # training parameters
             args.lr, args.steps_learn, args.transit, args.batch_size,
             args.total_instances, args.step_validation, args.ent_coeff, args.training_seed, args.embed_tabu_label,
