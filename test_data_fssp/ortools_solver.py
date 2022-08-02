@@ -82,6 +82,8 @@ if __name__ == '__main__':
     testing_type = ['tai']  # ['tai']
     tai_problem_j = [20]  # [20, 20, 20]
     tai_problem_m = [20]  # [5, 10, 20]
+    start_segment_flag = 5
+    end_segment_flag = 10
 
     for test_t in testing_type:  # select benchmark
         if test_t == 'tai':
@@ -92,15 +94,15 @@ if __name__ == '__main__':
 
         for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
-            inst = np.load('./{}{}x{}.npy'.format(test_t, p_j, p_m))
-            print('\nStart solving FSSP-{}{}x{} using OR-Tools...\n'.format(test_t, p_j, p_m))
+            inst = np.load('./{}{}x{}.npy'.format(test_t, p_j, p_m))[start_segment_flag:end_segment_flag, :, :, :]
+            print('\nStart solving FSSP-{}{}x{}[{},{}] using OR-Tools...\n'.format(test_t, p_j, p_m, start_segment_flag, end_segment_flag))
 
             # read saved gap_against or use ortools to solve it.
             if test_t in ['tai']:
                 from pathlib import Path
-                ortools_path = Path('./ortools_result_FSSP-{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                ortools_path = Path('./ortools_result_FSSP-{}{}x{}[{},{}]_result.npy'.format(test_t, p_j, p_m, start_segment_flag, end_segment_flag))
                 if not ortools_path.is_file():
-                    gap_against = np.load('./{}{}x{}_result.npy'.format(test_t, p_j, p_m))
+                    gap_against = np.load('./{}{}x{}_result.npy'.format(test_t, p_j, p_m))[start_segment_flag:end_segment_flag]
                     results = []
                     time_log = []
                     for i, data in enumerate(inst):
@@ -118,8 +120,8 @@ if __name__ == '__main__':
                     ortools_obj = results[:, 1]
                     ortools_gap = (ortools_obj - gap_against)/gap_against
                     ortools_gap_mean = ortools_gap.mean()
-                    np.save('./ortools_result_FSSP-{}{}x{}_result.npy'.format(test_t, p_j, p_m), results)
-                    np.save('./ortools_result_FSSP{}{}x{}_time.npy'.format(test_t, p_j, p_m), time_log.reshape(-1, 1))
+                    np.save('./ortools_result_FSSP-{}{}x{}[{},{}]_result.npy'.format(test_t, p_j, p_m, start_segment_flag, end_segment_flag), results)
+                    np.save('./ortools_result_FSSP-{}{}x{}[{},{}]_time.npy'.format(test_t, p_j, p_m, start_segment_flag, end_segment_flag), time_log.reshape(-1, 1))
                     print('Or-Tools mean gap:', ortools_gap_mean)
                     print('Or-Tools mean time:', time_log.mean())
             else:

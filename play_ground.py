@@ -24,3 +24,14 @@ print(result)
 # print(time)
 
 
+j = 20
+m = 5
+start_segment_flag = 0
+end_segment_flag = 10
+tp = 'tai'
+result = np.load('./test_data_fssp/ortools_result_FSSP-{}{}x{}[{},{}]_result.npy'.format(tp, j, m, start_segment_flag, end_segment_flag))
+time = np.load('./test_data_fssp/ortools_result_FSSP-{}{}x{}[{},{}]_time.npy'.format(tp, j, m, start_segment_flag, end_segment_flag))
+print(result)
+print(time)
+
+
