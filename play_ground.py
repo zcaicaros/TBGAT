@@ -35,3 +35,13 @@ print(result)
 print(time)
 
 
+j = 20
+m = 10
+l2s_result = np.load('l2s_result_{}x{}.npy'.format(j, m))
+ts_result = np.load('tabu_search_result_{}x{}.npy'.format(j, m))
+print(l2s_result.shape)
+print(ts_result.shape)
+
+relative_error = (l2s_result[4] - ts_result[3]) / ts_result[3]
+
+print(relative_error.mean())

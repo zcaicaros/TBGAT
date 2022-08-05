@@ -19,7 +19,7 @@ def main():
     print('using {} to test...'.format(dev))
 
     # MDP config
-    performance_milestones = [500, 1000, 2000, 5000]  # [500, 1000, 2000, 5000]
+    performance_milestones = [500, 1000, 2000, 5000, 12000]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'last_step', 'incumbent'
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
@@ -83,7 +83,8 @@ def main():
 
         for test_t in testing_type:  # select benchmark
 
-            inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))  # [[0], :, :, :]
+            # inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))[[0], :, :, :]
+            inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
@@ -131,7 +132,6 @@ def main():
             torch.cuda.manual_seed_all(seed)
             print('Starting rollout DRL policy...')
             # t3 = time.time()
-            result, computation_time = [], []
             G, (action_set, optimal_mark, paths) = env.reset(
                 instances=inst,
                 init_sol_type=init,
@@ -140,6 +140,7 @@ def main():
                 mask_previous_action=args.mask_previous_action == 'True',
                 longest_path_finder=args.path_finder)
             # t4 = time.time()
+            result, computation_time = [], []
             drl_start = time.time()
             while env.itr < max(performance_milestones):
                 # t1 = time.time()
@@ -169,9 +170,11 @@ def main():
                                 env.itr if env.itr > min(performance_milestones) else ' ' + str(env.itr)),
                             'Optimal Gap: {:.6f}    '.format(((DRL_result - gap_against) / gap_against).mean()),
                             'Average Time: {:.4f}    '.format(computation_time[-1] / inst.shape[0]),
-                            "Cmax is: {}".format(env.incumbent_objs.cpu().numpy()  # show makespan explicitly
-                                                 )
+                            # "Cmax is: {}".format(
+                            #     env.incumbent_objs.cpu().numpy()  # show makespan explicitly
+                            # )
                         )
+            np.save('./l2s_result_{}x{}.npy'.format(p_j, p_m), np.stack(result))
     # testing all benchmark
     else:
         print('Testing all instances of all sizes using all models.')
@@ -359,8 +362,9 @@ def main():
                                     'Optimal Gap: {:.6f}    '.format(
                                         ((DRL_result - gap_against) / gap_against).mean()),
                                     'Average Time: {:.4f}    '.format(time_milestone / inst.shape[0]),
-                                    "Cmax is: {}".format(env.incumbent_objs.cpu().numpy()  # show makespan explicitly
-                                                         )
+                                    "Cmax is: {}".format(
+                                        env.incumbent_objs.cpu().numpy()  # show makespan explicitly
+                                    )
                                 )
                                 # show makespan explicitly
                                 # print()

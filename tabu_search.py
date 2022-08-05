@@ -61,6 +61,7 @@ class TSN5:
         # print([lst.shape for lst in self.env_rollout.tabu_list])
 
         gap_log = []
+        tabu_result_all_steps, computation_time = [], []
         time_start = time.time()
         while self.env_rollout.itr < max(self.search_horizons):
             selected_action = self.calculate_move(G, self.env_rollout.current_objs, action_set, optimal_mark)
@@ -73,10 +74,13 @@ class TSN5:
             for log_horizon in self.search_horizons:
                 if self.env_rollout.itr == log_horizon:
                     tabu_result = self.env_rollout.incumbent_objs.cpu().squeeze().numpy()
+                    tabu_result_all_steps.append(tabu_result)
                     gap_log.append([((tabu_result - gap_against) / gap_against).mean()])
                     print('For testing steps: {}    '.format(self.env_rollout.itr if self.env_rollout.itr > 500 else ' ' + str(self.env_rollout.itr)),
                           'Optimal Gap: {:.6f}    '.format(((tabu_result - gap_against) / gap_against).mean()),
                           'Average Time: {:.4f}    '.format((time.time() - time_start) / self.instances.shape[0]))
+
+        np.save('./tabu_search_result_{}x{}.npy'.format(self.instances.shape[-2], self.instances.shape[-1]), np.stack(tabu_result_all_steps))
 
         return np.array(gap_log)
 
@@ -299,6 +303,7 @@ if __name__ == '__main__':
             print('Testing syn of size {}.'.format(test_instance_size))
 
         for test_t in testing_type:  # select benchmark
+            # inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))[[0], :, :, :]
             inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
             print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
 
@@ -384,6 +389,7 @@ if __name__ == '__main__':
 
             for p_j, p_m in zip(problem_j, problem_m):  # select problem size
 
+                # inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))[[0], :, :, :]
                 inst = np.load('./test_data_jssp/{}{}x{}.npy'.format(test_t, p_j, p_m))
 
                 print('\nStart testing {}{}x{}...'.format(test_t, p_j, p_m))
