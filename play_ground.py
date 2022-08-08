@@ -35,13 +35,23 @@ print(result)
 print(time)
 
 
-j = 20
+j = 15
 m = 10
+horizon_l2s = 3
+horizon_tb = 1
 l2s_result = np.load('l2s_result_{}x{}.npy'.format(j, m))
 ts_result = np.load('tabu_search_result_{}x{}.npy'.format(j, m))
-print(l2s_result.shape)
-print(ts_result.shape)
+opt_result = np.load('./test_data_jssp/syn{}x{}_result.npy'.format(j, m))
+# print(l2s_result.shape)
+# print(ts_result.shape)
 
-relative_error = (l2s_result[4] - ts_result[3]) / ts_result[3]
+relative_error = (l2s_result[horizon_l2s] - ts_result[horizon_tb]) / ts_result[horizon_tb]
+print('relative gap to tb:', relative_error.mean())
+print('outperform ratio:', (relative_error < 0).sum() / relative_error.shape[0])
 
-print(relative_error.mean())
+gap_l2s = (l2s_result[horizon_l2s] - opt_result) / opt_result
+gap_tb = (ts_result[horizon_tb] - opt_result) / opt_result
+print('opt gap of l2s:', gap_l2s.mean())
+print('opt gap of tb:', gap_tb.mean())
+print('improvement in terms of opt gap compared with tabu:', ((gap_l2s.mean() - gap_tb.mean())/gap_tb.mean()))
+

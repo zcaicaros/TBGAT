@@ -19,7 +19,7 @@ def main():
     print('using {} to test...'.format(dev))
 
     # MDP config
-    performance_milestones = [500, 1000, 2000, 5000, 12000]  # [500, 1000, 2000, 5000]
+    performance_milestones = [500, 1000, 2000, 5000, 16000, 20000]  # [500, 1000, 2000, 5000]
     result_type = 'incumbent'  # 'last_step', 'incumbent'
     init = 'fdd-divide-wkr'  # 'fdd-divide-wkr', 'spt'
 
