@@ -24,18 +24,18 @@ print(result)
 # print(time)
 
 
+# j = 20
+# m = 5
+# start_segment_flag = 0
+# end_segment_flag = 10
+# tp = 'tai'
+# result = np.load('./test_data_fssp/ortools_result_FSSP-{}{}x{}[{},{}]_result.npy'.format(tp, j, m, start_segment_flag, end_segment_flag))
+# time = np.load('./test_data_fssp/ortools_result_FSSP-{}{}x{}[{},{}]_time.npy'.format(tp, j, m, start_segment_flag, end_segment_flag))
+# print(result)
+# print(time)
+
+
 j = 20
-m = 5
-start_segment_flag = 0
-end_segment_flag = 10
-tp = 'tai'
-result = np.load('./test_data_fssp/ortools_result_FSSP-{}{}x{}[{},{}]_result.npy'.format(tp, j, m, start_segment_flag, end_segment_flag))
-time = np.load('./test_data_fssp/ortools_result_FSSP-{}{}x{}[{},{}]_time.npy'.format(tp, j, m, start_segment_flag, end_segment_flag))
-print(result)
-print(time)
-
-
-j = 15
 m = 10
 horizon_l2s = 3
 horizon_tb = 1
@@ -44,6 +44,8 @@ ts_result = np.load('tabu_search_result_{}x{}.npy'.format(j, m))
 opt_result = np.load('./test_data_jssp/syn{}x{}_result.npy'.format(j, m))
 # print(l2s_result.shape)
 # print(ts_result.shape)
+# print(l2s_result)
+# print(ts_result)
 
 relative_error = (l2s_result[horizon_l2s] - ts_result[horizon_tb]) / ts_result[horizon_tb]
 print('relative gap to tb:', relative_error.mean())
