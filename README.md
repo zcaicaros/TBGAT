@@ -10,13 +10,6 @@ If you make use of the code/experiment or TBGAT algorithm in your work, please c
   author =       {Zhang, Cong and Cao, Zhiguang and Wu, Yaoxin and Song, Wen and Sun, Jing},
   booktitle = 	 {Proceedings of the Fortieth Conference on Uncertainty in Artificial Intelligence},
   year = 	 {2024},
-  editor = 	 {Evans, Robin J. and Shpitser, Ilya},
-  volume = 	 {},
-  series = 	 {Proceedings of Machine Learning Research},
-  month = 	 {},
-  publisher =    {PMLR},
-  pdf = 	 {},
-  url = 	 {},
 }
 
 ```
