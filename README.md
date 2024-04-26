@@ -1,3 +1,27 @@
+# Learning Topological Representations with Bidirectional Graph Attention Network for Solving Job Shop Scheduling Problem
+
+Paper: https://arxiv.org/abs/2402.17606
+
+If you make use of the code/experiment or TBGAT algorithm in your work, please cite our paper (Bibtex below).
+```
+
+@InProceedings{zhanglearning2024,
+  title = 	 {Learning Topological Representations with Bidirectional Graph Attention Network for Solving Job Shop Scheduling Problem},
+  author =       {Zhang, Cong and Cao, Zhiguang and Wu, Yaoxin and Song, Wen and Sun, Jing},
+  booktitle = 	 {Proceedings of the Fortieth Conference on Uncertainty in Artificial Intelligence},
+  year = 	 {2024},
+  editor = 	 {Evans, Robin J. and Shpitser, Ilya},
+  volume = 	 {},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {},
+  publisher =    {PMLR},
+  pdf = 	 {},
+  url = 	 {},
+}
+
+```
+
+
 ### Manual Setup
 python 3.9.x
 
